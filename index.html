@@ -186,25 +186,6 @@ body{
   font-family:'IBM Plex Mono',monospace;font-size:12.5px;
   color:var(--teal-deep);background:var(--paper-2);cursor:text;
 }
-.owner-link-box{
-  margin-top:18px;padding:14px;
-  background:#FFF6E5;border:1.5px dashed var(--gold);border-radius:6px;
-}
-.owner-link-box label{margin-top:0;color:#7a5a12;}
-#ownerRoomLink{
-  font-family:'IBM Plex Mono',monospace;font-size:11.5px;
-  color:#7a5a12;background:var(--white);cursor:text;border-color:var(--gold);
-}
-.owner-reminder{
-  background:#FFF6E5;border:1.5px dashed var(--gold);border-radius:8px;
-  padding:14px 16px;margin-bottom:18px;
-}
-.owner-reminder-text{
-  font-size:13px;color:#7a5a12;line-height:1.7;margin-bottom:10px;
-}
-.owner-reminder-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
-.owner-reminder-actions .btn-secondary{border-color:var(--gold);color:#7a5a12;}
-.owner-reminder-actions .link-btn{color:#7a5a12;}
 .create-room-hint{
   background:var(--paper-2);border-left:3px solid var(--gold);
   padding:8px 10px;margin-top:10px;font-size:11.5px;
@@ -517,22 +498,6 @@ input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--
 .btn-secondary:hover{background:var(--paper-2);}
 .btn-secondary:disabled{opacity:0.6;cursor:wait;}
 
-.card-danger{border-color:var(--coral);background:#FFFBF9;}
-.card-danger h2{color:var(--coral);}
-.btn-danger{
-  margin-top:6px;
-  padding:11px 16px;
-  background:var(--white);
-  color:var(--coral);
-  border:1px solid var(--coral);
-  border-radius:6px;
-  font-family:'IBM Plex Mono',monospace;
-  font-weight:600;
-  font-size:13px;
-  cursor:pointer;
-}
-.btn-danger:hover{background:var(--coral);color:var(--white);}
-.btn-danger:disabled{opacity:0.6;cursor:wait;}
 .rate-updated{
   font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);
   margin-top:8px;
@@ -605,9 +570,6 @@ let appPhase = 'loading'; // 'loading' | 'setup' | 'app'
 let setupError = null;
 let setupBusy = false;
 let joinCodeDraft = '';
-let isRoomOwner = false; // 目前這個連結是不是「建立者專用的管理連結」打開的
-let ownerTokenDraft = null; // 建立房間流程中，還沒正式寫入雲端前暫存的管理密鑰
-let showOwnerReminder = false; // 剛建立完房間、還沒保存管理連結前，顯示提醒橫幅
 
 // 新的儲存後端：Firebase Realtime Database（規則已開放讀寫，不需要金鑰）
 const FIREBASE_DB_URL = 'https://trip-splitter-9e618-default-rtdb.asia-southeast1.firebasedatabase.app';
@@ -646,10 +608,6 @@ async function safeErrorText(res){
 
 function generateRoomId(){
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-}
-
-function generateOwnerToken(){
-  return Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 10);
 }
 
 // 幫 fetch 加上逾時保護：連線太久沒回應就直接判定失敗，不會讓畫面無限卡住
@@ -700,64 +658,10 @@ async function tryMigrateLegacyRoom(id){
   }
 }
 
-async function deleteRoomForever(){
-  if(deletingRoom) return;
-  if(!isRoomOwner){
-    deleteRoomError = '只有建立這個房間的人才能刪除，請改用建立當時給你的「管理連結」打開這個房間。';
-    render();
-    return;
-  }
-  const ok = confirm('確定要永久刪除這個房間嗎？\n\n所有人都會無法再打開這個房間，記帳資料也無法復原。請先確認大家都對好帳了。');
-  if(!ok) return;
-  deletingRoom = true;
-  deleteRoomError = null;
-  render();
-  try{
-    await firebaseDelete(roomId);
-    roomId = null;
-    state = null;
-    isRoomOwner = false;
-    appPhase = 'setup';
-    setupError = null;
-    history.replaceState(null, '', location.pathname);
-  }catch(e){
-    console.error('刪除房間失敗', e);
-    deleteRoomError = describeNetworkError(e);
-  }finally{
-    deletingRoom = false;
-    render();
-  }
-}
-
 function roomUrl(id){
   const url = new URL(location.href);
   url.searchParams.set('room', id);
-  url.searchParams.delete('owner'); // 一般分享連結絕對不能帶到管理密鑰
   return url.toString();
-}
-
-function ownerRoomUrl(id, token){
-  const url = new URL(location.href);
-  url.searchParams.set('room', id);
-  url.searchParams.set('owner', token);
-  return url.toString();
-}
-
-async function copyOwnerLink(btn, resetText){
-  try{
-    await navigator.clipboard.writeText(ownerRoomUrl(roomId, state.ownerToken));
-    if(btn){
-      btn.textContent = '已複製 ✓';
-      setTimeout(()=>{ btn.textContent = resetText; }, 1500);
-    }
-  }catch(e){
-    flashSaved('複製失敗，請手動複製網址列連結');
-  }
-}
-
-function dismissOwnerReminder(){
-  showOwnerReminder = false;
-  render();
 }
 
 const STALE_ROOM_DAYS = 90; // 房間超過幾天沒有任何活動，就會在有人造訪建立/加入畫面時被順手清理
@@ -799,8 +703,6 @@ async function sweepStaleRooms(){
 async function enterRoom(){
   appPhase = 'loading';
   render();
-  const params = new URLSearchParams(location.search);
-  const urlOwnerToken = params.get('owner');
   try{
     let record = await firebaseGet(roomId);
     if(!record){
@@ -811,14 +713,9 @@ async function enterRoom(){
       }
     }
     state = record || defaultState();
-    // 沒有管理密鑰的房間（換後端/舊功能建立的）沿用舊行為，任何人都能刪除；
-    // 有管理密鑰的房間，只有網址帶對密鑰的人才算擁有者
-    isRoomOwner = !state.ownerToken || (urlOwnerToken !== null && urlOwnerToken === state.ownerToken);
     // 進房間也算一次活動，順便更新/補上活動時間戳記
     await firebaseSet(roomId, { ...state, lastActiveAt: Date.now() });
     appPhase = 'app';
-    // 網址列固定只顯示一般連結，不會因為你是擁有者就偷偷把管理密鑰露在網址列上
-    // （避免有人直接從網址列複製分享，不小心把刪除權限也一起傳出去）
     history.replaceState(null, '', roomUrl(roomId));
   }catch(e){
     console.error('進入房間失敗', e);
@@ -842,7 +739,6 @@ async function createNewRoom(){
     const id = generateRoomId();
     roomId = id;
     state = defaultState();
-    ownerTokenDraft = generateOwnerToken();
     try{
       await navigator.clipboard.writeText(roomUrl(roomId));
       roomCreatedAutoCopied = true;
@@ -866,11 +762,7 @@ async function enterCreatedRoom(){
   render();
   try{
     // 真正把房間寫進雲端資料庫，房間到這一步才算正式成立
-    await firebaseSet(roomId, { ...state, lastActiveAt: Date.now(), ownerToken: ownerTokenDraft });
-    state.ownerToken = ownerTokenDraft;
-    isRoomOwner = true;
-    showOwnerReminder = true;
-    // 網址列一樣固定顯示一般連結，管理密鑰只存在記憶體裡，不會露在網址列
+    await firebaseSet(roomId, { ...state, lastActiveAt: Date.now() });
     history.replaceState(null, '', roomUrl(roomId));
     appPhase = 'app';
   }catch(e){
@@ -926,8 +818,6 @@ let draft = {title:'', amount:'', currency:null, payer:0, participants:null};
 let fetchingRates = false;
 let rateFetchError = null;
 let editingId = null;
-let deletingRoom = false;
-let deleteRoomError = null;
 let convAmount = '1';
 let convFrom = null;
 let convTo = null;
@@ -1324,25 +1214,11 @@ function render(){
 
   app.innerHTML = `
     ${renderHeader()}
-    ${showOwnerReminder ? renderOwnerReminderBanner() : ''}
     ${renderTabs()}
     <div id="tabContent">${renderTabContent()}</div>
     <div class="footer-note">⚠ 共用房間・任何拿到這個連結的人都能檢視及編輯這份紀錄・匯率可一鍵抓即時匯率，或自行手動修改</div>
   `;
   bindGlobalEvents();
-}
-
-function renderOwnerReminderBanner(){
-  return `
-  <div class="owner-reminder">
-    <div class="owner-reminder-text">
-      🔑 <strong>提醒：</strong>重新整理頁面後，這個分頁就會失去刪除房間的權限。建議現在就複製你的專屬管理連結保存起來（例如貼到自己的備忘錄），之後才刪得掉這個房間。
-    </div>
-    <div class="owner-reminder-actions">
-      <button class="btn-secondary" id="reminderCopyBtn" style="padding:8px 12px;font-size:11.5px;">複製管理連結</button>
-      <button class="link-btn" id="reminderDismissBtn">知道了，先關掉</button>
-    </div>
-  </div>`;
 }
 
 function renderLoadingScreen(){
@@ -1407,7 +1283,6 @@ function renderRoomCreatedScreen(){
       <button class="btn-secondary" id="copyCreatedLinkBtn" style="width:100%;text-align:center;margin-top:10px;">複製連結</button>
       <button class="btn-primary" id="enterRoomBtn" style="margin-top:16px;" ${createdRoomBusy?'disabled':''}>${createdRoomBusy ? '建立中…' : '✓ 我已經複製好了，正式建立並進入房間'}</button>
       ${createdRoomError ? `<div class="rate-error">${escapeHtml(createdRoomError)}</div>` : ''}
-      <p class="section-note" style="margin-top:14px;text-align:center;">進入房間後，這個瀏覽器分頁在重新整理之前都具備刪除權限；重新整理、換裝置或想先備份，可以到「出遊成員」分頁的「房間管理」裡複製你的專屬管理連結保存起來。</p>
     </div>
   </div>`;
 }
@@ -1547,18 +1422,6 @@ function renderPeopleTab(){
         </div>
       `).join('')}
     </div>
-  </div>
-  <div class="card card-danger">
-    <h2>⚠ 房間管理</h2>
-    ${isRoomOwner ? `
-    <p class="section-note">你目前擁有這個房間的管理權限。想在別的裝置或分享給自己備份，可以複製下面的專屬管理連結——<strong>不要把它分享給別人</strong>，拿到這個連結的人就等於拿到刪除房間的權限。</p>
-    <button class="btn-secondary" id="copyOwnerLinkBtn" style="width:100%;text-align:center;margin-bottom:14px;">複製我的管理連結</button>
-    <p class="section-note">旅行結束、確定不會再用到這個房間了嗎？可以把它永久刪除，釋放共用同步額度給下一趟旅行用。<strong>刪除後所有人（包含你自己）都無法再打開這個房間，紀錄也無法復原</strong>，請先確認大家都對好帳了再刪。</p>
-    <button class="btn-danger" id="deleteRoomBtn" ${deletingRoom?'disabled':''}>${deletingRoom ? '刪除中…' : '🗑 永久刪除這個房間'}</button>
-    ` : `
-    <p class="section-note">🔒 只有建立這個房間的人才能刪除房間。如果你就是建立者，請改用當初建立房間時的瀏覽器分頁，或用那次自己保存的管理連結重新打開這個房間（一般分享連結沒有這個權限）。</p>
-    `}
-    ${deleteRoomError ? `<div class="rate-error">${escapeHtml(deleteRoomError)}</div>` : ''}
   </div>`;
 }
 
@@ -1877,26 +1740,6 @@ function bindGlobalEvents(){
     if(convToSelect) convToSelect.value = convTo;
     updateConverterResult();
   };
-
-  const deleteRoomBtn = document.getElementById('deleteRoomBtn');
-  if(deleteRoomBtn) deleteRoomBtn.onclick = deleteRoomForever;
-
-  const copyOwnerBtn = document.getElementById('copyOwnerLinkBtn');
-  if(copyOwnerBtn) copyOwnerBtn.onclick = ()=>copyOwnerLink(copyOwnerBtn, '複製我的管理連結');
-
-  const reminderCopyBtn = document.getElementById('reminderCopyBtn');
-  if(reminderCopyBtn) reminderCopyBtn.onclick = async ()=>{
-    try{
-      await navigator.clipboard.writeText(ownerRoomUrl(roomId, state.ownerToken));
-      flashSaved('已複製管理連結');
-      dismissOwnerReminder();
-    }catch(e){
-      flashSaved('複製失敗，請手動複製網址列連結');
-    }
-  };
-
-  const reminderDismissBtn = document.getElementById('reminderDismissBtn');
-  if(reminderDismissBtn) reminderDismissBtn.onclick = dismissOwnerReminder;
 
   const exportBtn = document.getElementById('exportCsvBtn');
   if(exportBtn) exportBtn.onclick = exportToCsv;
