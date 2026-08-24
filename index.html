@@ -298,6 +298,25 @@ input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--
   font-weight:600;
 }
 .chip-row-actions{display:flex;gap:14px;margin-top:6px;}
+
+.custom-shares{
+  margin-top:14px;padding:14px;
+  background:var(--paper);border:1px solid var(--line);border-radius:6px;
+}
+.custom-share-row{
+  display:flex;align-items:center;gap:10px;margin-bottom:8px;
+}
+.custom-share-row:last-of-type{margin-bottom:0;}
+.custom-share-name{
+  flex:1;font-size:13.5px;font-weight:500;
+}
+.custom-share-row input{width:120px;flex-shrink:0;}
+.custom-share-sum{
+  margin-top:12px;padding:8px 10px;border-radius:5px;
+  font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:center;
+}
+.custom-share-sum.sum-ok{background:#E9F5F0;color:var(--teal-deep);}
+.custom-share-sum.sum-warn{background:#FBEAE5;color:var(--coral);}
 .link-btn{
   background:none;border:none;color:var(--teal-deep);font-size:11.5px;
   text-decoration:underline;cursor:pointer;padding:0;font-family:'IBM Plex Mono',monospace;
@@ -831,7 +850,9 @@ function resetDraft(){
     amount:'',
     currency: state.baseCurrency,
     payer:0,
-    participants: state.people.map((_,i)=>i)
+    participants: state.people.map((_,i)=>i),
+    splitMode: 'equal',
+    customShares: {}
   };
 }
 
@@ -848,15 +869,30 @@ function convertAmount(amount, fromCur, toCur){
   return toRate ? baseAmt / toRate : 0;
 }
 
+// 算出一筆消費裡，每個分攤成員各自要負擔多少（換算成基準幣別）；
+// 平均分攤就是總額除以人數，自訂金額就是各自輸入的數字（原始幣別）換算過去
+function getExpenseShares(e){
+  const shares = {};
+  if(e.splitMode === 'custom' && e.customShares){
+    e.participants.forEach(idx=>{
+      const raw = e.customShares[idx] ?? 0;
+      shares[idx] = toBase(raw, e.currency);
+    });
+  }else{
+    const share = toBase(e.amount, e.currency) / (e.participants.length || 1);
+    e.participants.forEach(idx=>{ shares[idx] = share; });
+  }
+  return shares;
+}
+
 function computeBalances(){
   // balances[i] = 已付(base) - 應付(base)
   const balances = state.people.map(()=>0);
   state.expenses.forEach(e=>{
     const baseAmt = toBase(e.amount, e.currency);
-    const n = e.participants.length || 1;
-    const share = baseAmt / n;
+    const shares = getExpenseShares(e);
     balances[e.payer] += baseAmt;
-    e.participants.forEach(pIdx=>{ balances[pIdx] -= share; });
+    e.participants.forEach(pIdx=>{ balances[pIdx] -= (shares[pIdx] || 0); });
   });
   return balances;
 }
@@ -866,12 +902,10 @@ function computePairwiseOwed(){
   const n = state.people.length;
   const owed = Array.from({length:n}, ()=>Array(n).fill(0));
   state.expenses.forEach(e=>{
-    const baseAmt = toBase(e.amount, e.currency);
-    const n2 = e.participants.length || 1;
-    const share = baseAmt / n2;
+    const shares = getExpenseShares(e);
     e.participants.forEach(p=>{
       if(p !== e.payer){
-        owed[p][e.payer] += share;
+        owed[p][e.payer] += (shares[p] || 0);
       }
     });
   });
@@ -952,18 +986,22 @@ function exportToCsv(){
   lines.push('');
 
   lines.push(csvRow(['—— 消費紀錄 ——']));
-  lines.push(csvRow(['名目','金額','幣別',`換算後金額(${state.baseCurrency})`,'付款人','分攤人數',`每人分攤(${state.baseCurrency})`,'分攤成員']));
+  lines.push(csvRow(['名目','金額','幣別',`換算後金額(${state.baseCurrency})`,'付款人','分攤方式','分攤人數','分攤明細']));
   state.expenses.forEach(e=>{
-    const share = toBase(e.amount,e.currency)/(e.participants.length||1);
+    const shares = getExpenseShares(e);
+    const isCustom = e.splitMode === 'custom' && e.customShares;
+    const breakdown = e.participants
+      .map(i=>`${state.people[i] ?? '—'}:${fmt(shares[i]||0)}`)
+      .join('、');
     lines.push(csvRow([
       e.title,
       e.amount,
       e.currency,
       fmt(toBase(e.amount,e.currency)),
       state.people[e.payer] ?? '（已刪除）',
+      isCustom ? '自訂金額' : '平均分攤',
       e.participants.length,
-      fmt(share),
-      e.participants.map(i=>state.people[i]).filter(Boolean).join('、')
+      breakdown
     ]));
   });
   lines.push('');
@@ -1056,42 +1094,91 @@ function updateTitle(val){
 
 function toggleParticipant(idx){
   const pos = draft.participants.indexOf(idx);
-  if(pos >= 0) draft.participants.splice(pos,1);
-  else draft.participants.push(idx);
+  if(pos >= 0){
+    draft.participants.splice(pos,1);
+    delete draft.customShares[idx];
+  }else{
+    draft.participants.push(idx);
+    if(draft.splitMode === 'custom' && draft.customShares[idx] === undefined){
+      draft.customShares[idx] = '';
+    }
+  }
   renderAddTabOnly();
 }
 
 function selectAllParticipants(all){
   draft.participants = all ? state.people.map((_,i)=>i) : [];
+  if(draft.splitMode === 'custom'){
+    if(all){
+      draft.participants.forEach(idx=>{
+        if(draft.customShares[idx] === undefined) draft.customShares[idx] = '';
+      });
+    }else{
+      draft.customShares = {};
+    }
+  }
   renderAddTabOnly();
+}
+
+function setSplitMode(mode){
+  draft.splitMode = mode;
+  if(mode === 'custom'){
+    draft.participants.forEach(idx=>{
+      if(draft.customShares[idx] === undefined) draft.customShares[idx] = '';
+    });
+  }
+  renderAddTabOnly();
+}
+
+function updateCustomShareSum(){
+  const el = document.getElementById('customShareSum');
+  if(!el) return;
+  const target = parseFloat(draft.amount) || 0;
+  const sum = draft.participants.reduce((s,idx)=> s + (parseFloat(draft.customShares[idx]) || 0), 0);
+  const diff = Math.round((target - sum) * 100) / 100;
+  el.className = 'custom-share-sum ' + (Math.abs(diff) < 0.01 ? 'sum-ok' : 'sum-warn');
+  el.textContent = Math.abs(diff) < 0.01
+    ? `✓ 合計 ${fmt(sum)}，跟總額相符`
+    : `合計 ${fmt(sum)}，跟總額 ${fmt(target)} 差 ${fmt(Math.abs(diff))}（${diff>0?'還沒分完':'超過總額了'}）`;
 }
 
 function addExpense(){
   const amt = parseFloat(draft.amount);
   if(!draft.title.trim() || !amt || amt <= 0 || draft.participants.length === 0) return;
 
+  const isCustom = draft.splitMode === 'custom';
+  const customShares = isCustom
+    ? Object.fromEntries(draft.participants.map(idx=>[idx, parseFloat(draft.customShares[idx]) || 0]))
+    : undefined;
+
   if(editingId !== null){
     const idx = state.expenses.findIndex(e=>e.id===editingId);
     if(idx !== -1){
-      state.expenses[idx] = {
+      const updated = {
         ...state.expenses[idx],
         title: draft.title.trim(),
         amount: amt,
         currency: draft.currency,
         payer: draft.payer,
-        participants: [...draft.participants]
+        participants: [...draft.participants],
+        splitMode: draft.splitMode
       };
+      if(isCustom) updated.customShares = customShares; else delete updated.customShares;
+      state.expenses[idx] = updated;
     }
     editingId = null;
   }else{
-    state.expenses.unshift({
+    const newExpense = {
       id: Date.now(),
       title: draft.title.trim(),
       amount: amt,
       currency: draft.currency,
       payer: draft.payer,
-      participants: [...draft.participants]
-    });
+      participants: [...draft.participants],
+      splitMode: draft.splitMode
+    };
+    if(isCustom) newExpense.customShares = customShares;
+    state.expenses.unshift(newExpense);
   }
   saveState();
   resetDraft();
@@ -1102,12 +1189,17 @@ function startEditExpense(id){
   const e = state.expenses.find(x=>x.id===id);
   if(!e) return;
   editingId = id;
+  const isCustom = e.splitMode === 'custom' && e.customShares;
   draft = {
     title: e.title,
     amount: String(e.amount),
     currency: e.currency,
     payer: e.payer,
-    participants: [...e.participants]
+    participants: [...e.participants],
+    splitMode: isCustom ? 'custom' : 'equal',
+    customShares: isCustom
+      ? Object.fromEntries(e.participants.map(idx=>[idx, String(e.customShares[idx] ?? '')]))
+      : {}
   };
   activeTab = 'add';
   render();
@@ -1454,7 +1546,7 @@ function renderAddTab(){
       ${state.people.map((p,i)=>`<option value="${i}" ${draft.payer===i?'selected':''}>${escapeHtml(p)}</option>`).join('')}
     </select>
 
-    <label>這筆要由誰分攤（${draft.participants.length} 人平分）</label>
+    <label>這筆要由誰分攤（${draft.participants.length} 人${draft.splitMode==='custom'?'自訂比例':'平均'}分攤）</label>
     <div class="chip-group">
       ${state.people.map((p,i)=>`<span class="chip ${draft.participants.includes(i)?'on':''}" data-toggle-participant="${i}">${escapeHtml(p)}</span>`).join('')}
     </div>
@@ -1462,6 +1554,25 @@ function renderAddTab(){
       <button class="link-btn" id="selectAllBtn">全選</button>
       <button class="link-btn" id="selectNoneBtn">全不選</button>
     </div>
+
+    <label>分攤方式</label>
+    <div class="chip-group">
+      <span class="chip ${draft.splitMode==='equal'?'on':''}" data-split-mode="equal">平均分攤</span>
+      <span class="chip ${draft.splitMode==='custom'?'on':''}" data-split-mode="custom">自訂金額</span>
+    </div>
+
+    ${draft.splitMode==='custom' ? `
+    <div class="custom-shares">
+      <p class="section-note" style="margin-top:0;">幫每個人填上這筆要各付多少（用「${draft.currency}」這個幣別填），例如總共500元，一個填100、另一個填400。</p>
+      ${draft.participants.length===0 ? `<div class="mc-empty">請先在上面勾選要分攤的成員</div>` : draft.participants.map(idx=>`
+        <div class="custom-share-row">
+          <span class="custom-share-name">${escapeHtml(state.people[idx] ?? '—')}</span>
+          <input type="number" data-custom-share="${idx}" placeholder="0" value="${escapeHtml(draft.customShares[idx] ?? '')}">
+        </div>
+      `).join('')}
+      ${draft.participants.length>0 ? `<div class="custom-share-sum" id="customShareSum"></div>` : ''}
+    </div>
+    ` : ''}
 
     <button class="btn-primary" id="addExpenseBtn" ${(!draft.title.trim()||!draft.amount||draft.participants.length===0)?'disabled':''}>${isEditing ? '儲存修改' : '加入這筆消費'}</button>
     ${isEditing ? `<button class="link-btn" id="cancelEditBtn" style="display:block;margin:10px auto 0;">取消修改</button>` : ''}
@@ -1478,9 +1589,14 @@ function renderAddTab(){
 function renderTicket(e, isBeingEdited){
   const payerName = state.people[e.payer] ?? '（已刪除）';
   const n = e.participants.length;
+  const isCustom = e.splitMode === 'custom' && e.customShares;
+  const shares = getExpenseShares(e);
   const share = n ? (toBase(e.amount,e.currency)/n) : 0;
   const isForeign = e.currency !== state.baseCurrency;
   const participantNames = e.participants.map(i=>state.people[i]).filter(Boolean).join('、');
+  const breakdown = isCustom
+    ? e.participants.map(idx=>`${escapeHtml(state.people[idx] ?? '—')} ${state.baseCurrency}${fmt(shares[idx]||0)}`).join('、')
+    : '';
   return `
   <div class="ticket ${isBeingEdited ? 'ticket-editing' : ''}">
     <div class="ticket-top">
@@ -1492,8 +1608,11 @@ function renderTicket(e, isBeingEdited){
     </div>
     <div class="ticket-amt">${e.currency} ${fmt(e.amount)}</div>
     <div class="ticket-meta">
-      ${escapeHtml(payerName)} 先付款 ・ ${n} 人平分 ・ 每人 ${fmt(share)} ${state.baseCurrency}
+      ${isCustom
+        ? `${escapeHtml(payerName)} 先付款 ・ ${n} 人自訂比例分攤`
+        : `${escapeHtml(payerName)} 先付款 ・ ${n} 人平分 ・ 每人 ${fmt(share)} ${state.baseCurrency}`}
       ${isForeign ? `<br><span class="ticket-fx">換算 ≈ ${fmt(toBase(e.amount,e.currency))} ${state.baseCurrency}</span>` : ''}
+      ${isCustom ? `<br><span class="ticket-fx">分攤明細：${breakdown}</span>` : ''}
       <br>分攤成員：${escapeHtml(participantNames || '—')}
     </div>
   </div>`;
@@ -1613,10 +1732,10 @@ function renderDetailTab(){
 
 function renderDetailCard(name, idx){
   const items = state.expenses.filter(e=>e.participants.includes(idx));
-  const total = items.reduce((s,e)=> s + toBase(e.amount,e.currency)/(e.participants.length||1), 0);
+  const total = items.reduce((s,e)=> s + (getExpenseShares(e)[idx] || 0), 0);
   const initial = (name||'?').trim().charAt(0) || '?';
   const rows = items.map(e=>{
-    const share = toBase(e.amount,e.currency)/(e.participants.length||1);
+    const share = getExpenseShares(e)[idx] || 0;
     const isPayer = e.payer===idx;
     const isForeign = e.currency !== state.baseCurrency;
     return `
@@ -1645,7 +1764,7 @@ function renderDetailCard(name, idx){
 function personalDetailText(idx){
   const name = state.people[idx] ?? '（未命名）';
   const items = state.expenses.filter(e=>e.participants.includes(idx));
-  const total = items.reduce((s,e)=> s + toBase(e.amount,e.currency)/(e.participants.length||1), 0);
+  const total = items.reduce((s,e)=> s + (getExpenseShares(e)[idx] || 0), 0);
   const lines = [];
   lines.push(`【${name}】個人消費明細 - ${state.tripTitle}`);
   lines.push('--------------------------------');
@@ -1653,7 +1772,7 @@ function personalDetailText(idx){
     lines.push('目前沒有分攤任何消費');
   }else{
     items.forEach(e=>{
-      const share = toBase(e.amount,e.currency)/(e.participants.length||1);
+      const share = getExpenseShares(e)[idx] || 0;
       const tag = e.payer===idx ? '（已付款）' : `（${state.people[e.payer] ?? '—'}先付）`;
       lines.push(`${e.title}：${state.baseCurrency} ${fmt(share)} ${tag}`);
     });
@@ -1713,7 +1832,7 @@ function bindGlobalEvents(){
   if(dTitle) dTitle.oninput = (e)=>{ draft.title = e.target.value; refreshAddButton(); };
 
   const dAmount = document.getElementById('draftAmount');
-  if(dAmount) dAmount.oninput = (e)=>{ draft.amount = e.target.value; updateConversionNote(); refreshAddButton(); };
+  if(dAmount) dAmount.oninput = (e)=>{ draft.amount = e.target.value; updateConversionNote(); updateCustomShareSum(); refreshAddButton(); };
 
   const dCurrency = document.getElementById('draftCurrency');
   if(dCurrency) dCurrency.onchange = (e)=>{ draft.currency = e.target.value; updateConversionNote(); };
@@ -1756,6 +1875,18 @@ function bindGlobalEvents(){
   const selNone = document.getElementById('selectNoneBtn');
   if(selAll) selAll.onclick = ()=>selectAllParticipants(true);
   if(selNone) selNone.onclick = ()=>selectAllParticipants(false);
+
+  document.querySelectorAll('[data-split-mode]').forEach(btn=>{
+    btn.onclick = ()=>setSplitMode(btn.dataset.splitMode);
+  });
+
+  document.querySelectorAll('[data-custom-share]').forEach(inp=>{
+    inp.oninput = (e)=>{
+      draft.customShares[inp.dataset.customShare] = e.target.value;
+      updateCustomShareSum();
+    };
+  });
+  updateCustomShareSum(); // 畫面剛渲染完，先算一次目前的合計顯示出來
 
   const addBtn = document.getElementById('addExpenseBtn');
   if(addBtn) addBtn.onclick = addExpense;
