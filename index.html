@@ -1,0 +1,1973 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>旅行分帳票根</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans+TC:wght@400;500;600;700&display=swap');
+
+:root{
+  --ink:#1E2A35;
+  --ink-soft:#4A5A66;
+  --paper:#F7F2E6;
+  --paper-2:#EFE7D4;
+  --teal:#0E6B5C;
+  --teal-deep:#0A4F45;
+  --gold:#C79A3D;
+  --coral:#C1442A;
+  --line:#D8CDB0;
+  --white:#FFFDF8;
+  --radius:2px;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(circle at 1px 1px, rgba(30,42,53,0.06) 1px, transparent 0) 0 0/16px 16px,
+    var(--paper);
+  color:var(--ink);
+  font-family:'IBM Plex Sans TC','IBM Plex Mono',sans-serif;
+  min-height:100vh;
+  padding:24px 14px 60px;
+}
+
+.app{max-width:640px;margin:0 auto;}
+
+/* ===== Header: boarding-pass strip ===== */
+.boardingpass{
+  background:var(--ink);
+  color:var(--paper);
+  border-radius:10px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 10px 30px rgba(30,42,53,0.22);
+  margin-bottom:22px;
+}
+.bp-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  padding:20px 22px 16px;
+  gap:16px;
+}
+.bp-eyebrow{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10.5px;
+  letter-spacing:0.22em;
+  color:var(--gold);
+  text-transform:uppercase;
+  margin:0 0 6px;
+}
+.bp-title-input{
+  background:transparent;
+  border:none;
+  border-bottom:1px dashed rgba(247,242,230,0.35);
+  font-family:'Fraunces',serif;
+  font-weight:600;
+  font-size:26px;
+  color:var(--paper);
+  padding:2px 0 6px;
+  width:100%;
+  outline:none;
+}
+.bp-title-input::placeholder{color:rgba(247,242,230,0.4);}
+.bp-stub{
+  font-family:'IBM Plex Mono',monospace;
+  text-align:right;
+  flex-shrink:0;
+  border-left:1px dashed rgba(247,242,230,0.35);
+  padding-left:16px;
+  min-width:118px;
+}
+.bp-stub .num{font-size:26px;font-weight:700;color:var(--gold);line-height:1;}
+.bp-stub .lbl{font-size:10px;letter-spacing:0.14em;color:rgba(247,242,230,0.65);margin-top:4px;text-transform:uppercase;}
+.bp-stub .lbl-avg{
+  font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:600;
+  color:var(--gold);margin-top:6px;padding-top:6px;
+  border-top:1px dashed rgba(247,242,230,0.25);
+}
+
+.bp-perforation{
+  position:relative;
+  height:0;
+  border-top:1.5px dashed rgba(247,242,230,0.3);
+  margin:0 22px;
+}
+.bp-perforation::before,.bp-perforation::after{
+  content:'';
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:20px;height:20px;background:var(--paper);border-radius:50%;
+}
+.bp-perforation::before{left:-32px;}
+.bp-perforation::after{right:-32px;}
+
+.bp-bottom{
+  display:flex;
+  padding:14px 22px 18px;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11.5px;
+  color:rgba(247,242,230,0.75);
+}
+.bp-people-edit{
+  display:flex;align-items:center;gap:8px;
+}
+.bp-people-edit button{
+  width:22px;height:22px;border-radius:50%;border:1px solid rgba(247,242,230,0.4);
+  background:transparent;color:var(--paper);cursor:pointer;font-size:14px;line-height:1;
+}
+.bp-people-edit button:hover{background:rgba(247,242,230,0.15);}
+.bp-currency-select{
+  margin-left:auto;
+  background:rgba(247,242,230,0.1);
+  border:1px solid rgba(247,242,230,0.3);
+  color:var(--gold);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11.5px;
+  padding:4px 8px;
+  border-radius:4px;
+}
+.bp-refresh-btn{
+  background:rgba(247,242,230,0.1);
+  border:1px solid rgba(247,242,230,0.3);
+  color:var(--paper);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11.5px;
+  padding:4px 10px;
+  border-radius:4px;
+  cursor:pointer;
+}
+.bp-refresh-btn:hover{background:rgba(247,242,230,0.2);}
+
+.room-badge-row{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:10px 22px;
+  border-bottom:1px dashed rgba(247,242,230,0.25);
+  flex-wrap:wrap;
+}
+.room-badge{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(247,242,230,0.75);
+}
+.room-badge b{color:var(--gold);letter-spacing:0.02em;}
+.room-copy-btn{
+  background:var(--gold);color:var(--ink);border:none;border-radius:4px;
+  font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;
+  padding:5px 10px;cursor:pointer;
+}
+.room-copy-btn:hover{background:#d9ac4a;}
+
+/* ===== Setup / room screens ===== */
+.setup-screen{max-width:520px;margin:40px auto 0;}
+.setup-eyebrow{
+  font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:0.22em;
+  color:var(--gold);text-transform:uppercase;text-align:center;margin:0 0 10px;
+}
+.setup-title{
+  font-family:'Fraunces',serif;font-weight:700;font-size:30px;text-align:center;margin:0 0 10px;color:var(--ink);
+}
+.setup-sub{
+  text-align:center;color:var(--ink-soft);font-size:14px;line-height:1.7;margin:0 0 26px;
+}
+.setup-card{
+  background:var(--white);border:1px solid var(--line);border-radius:8px;
+  padding:20px;margin-bottom:16px;
+}
+.setup-card h2{font-family:'Fraunces',serif;font-size:17px;margin:0 0 8px;}
+.created-card{border-color:var(--gold);}
+.created-warning{
+  background:#FFF6E5;border:1px solid var(--gold);border-radius:5px;
+  padding:10px 12px;color:#7a5a12;font-weight:500;line-height:1.7;
+}
+#createdRoomLink{
+  font-family:'IBM Plex Mono',monospace;font-size:12.5px;
+  color:var(--teal-deep);background:var(--paper-2);cursor:text;
+}
+.owner-link-box{
+  margin-top:18px;padding:14px;
+  background:#FFF6E5;border:1.5px dashed var(--gold);border-radius:6px;
+}
+.owner-link-box label{margin-top:0;color:#7a5a12;}
+#ownerRoomLink{
+  font-family:'IBM Plex Mono',monospace;font-size:11.5px;
+  color:#7a5a12;background:var(--white);cursor:text;border-color:var(--gold);
+}
+.owner-reminder{
+  background:#FFF6E5;border:1.5px dashed var(--gold);border-radius:8px;
+  padding:14px 16px;margin-bottom:18px;
+}
+.owner-reminder-text{
+  font-size:13px;color:#7a5a12;line-height:1.7;margin-bottom:10px;
+}
+.owner-reminder-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.owner-reminder-actions .btn-secondary{border-color:var(--gold);color:#7a5a12;}
+.owner-reminder-actions .link-btn{color:#7a5a12;}
+.create-room-hint{
+  background:var(--paper-2);border-left:3px solid var(--gold);
+  padding:8px 10px;margin-top:10px;font-size:11.5px;
+}
+.setup-loading{
+  text-align:center;font-family:'IBM Plex Mono',monospace;color:var(--ink-soft);
+  padding:40px 0;font-size:13px;
+}
+.setup-note{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);
+  line-height:1.8;text-align:center;margin-top:20px;
+}
+.setup-steps{
+  margin:0 0 16px;padding-left:20px;color:var(--ink-soft);font-size:13px;line-height:1.9;
+}
+.setup-steps a{color:var(--teal-deep);font-weight:600;}
+.setup-steps strong{color:var(--ink);}
+
+/* ===== Tabs ===== */
+.tabs{display:flex;gap:6px;margin-bottom:18px;}
+.tab-btn{
+  flex:1;
+  padding:10px 8px;
+  background:var(--paper-2);
+  border:1px solid var(--line);
+  border-radius:6px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12.5px;
+  font-weight:600;
+  letter-spacing:0.03em;
+  color:var(--ink-soft);
+  cursor:pointer;
+  transition:all .15s;
+}
+.tab-btn.active{
+  background:var(--teal);
+  border-color:var(--teal-deep);
+  color:var(--white);
+}
+
+/* ===== Card ===== */
+.card{
+  background:var(--white);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:20px;
+  margin-bottom:16px;
+  box-shadow:0 2px 0 rgba(30,42,53,0.04);
+}
+.card h2{
+  font-family:'Fraunces',serif;
+  font-size:18px;
+  font-weight:600;
+  margin:0 0 14px;
+  color:var(--ink);
+  display:flex;align-items:center;gap:8px;
+}
+.section-note{
+  font-size:12px;color:var(--ink-soft);margin:-8px 0 14px;line-height:1.6;
+}
+
+label{
+  display:block;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+  margin-bottom:5px;
+  margin-top:14px;
+}
+label:first-of-type{margin-top:0;}
+input[type=text],input[type=number],select{
+  width:100%;
+  padding:10px 11px;
+  border:1px solid var(--line);
+  border-radius:5px;
+  font-family:'IBM Plex Sans TC',sans-serif;
+  font-size:14.5px;
+  background:var(--paper);
+  color:var(--ink);
+  outline:none;
+}
+input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--teal);}
+.row{display:flex;gap:10px;}
+.row > div{flex:1;}
+
+.people-name-list{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
+.people-name-row{display:flex;align-items:center;gap:8px;}
+.people-name-row .tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--gold);
+  width:20px;flex-shrink:0;
+}
+
+.chip-group{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px;}
+.chip{
+  padding:7px 12px;
+  border-radius:20px;
+  border:1px solid var(--line);
+  background:var(--paper);
+  font-size:13px;
+  cursor:pointer;
+  color:var(--ink-soft);
+  user-select:none;
+}
+.chip.on{
+  background:var(--teal);
+  border-color:var(--teal-deep);
+  color:var(--white);
+  font-weight:600;
+}
+.chip-row-actions{display:flex;gap:14px;margin-top:6px;}
+.link-btn{
+  background:none;border:none;color:var(--teal-deep);font-size:11.5px;
+  text-decoration:underline;cursor:pointer;padding:0;font-family:'IBM Plex Mono',monospace;
+}
+
+.btn-primary{
+  margin-top:18px;
+  width:100%;
+  padding:13px;
+  background:var(--coral);
+  color:var(--white);
+  border:none;
+  border-radius:6px;
+  font-family:'IBM Plex Mono',monospace;
+  font-weight:600;
+  font-size:14px;
+  letter-spacing:0.03em;
+  cursor:pointer;
+}
+.btn-primary:hover{background:#a63a23;}
+.btn-primary:disabled{background:#ccc;cursor:not-allowed;}
+
+/* ===== Expense ticket ===== */
+.ticket{
+  position:relative;
+  background:var(--white);
+  border:1px solid var(--line);
+  border-left:5px solid var(--teal);
+  border-radius:6px;
+  padding:13px 14px;
+  margin-bottom:10px;
+}
+.ticket-editing{
+  border-left-color:var(--gold);
+  box-shadow:0 0 0 2px rgba(199,154,61,0.35);
+}
+.ticket-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.ticket-title{font-family:'Fraunces',serif;font-weight:600;font-size:15.5px;flex:1;min-width:0;}
+.ticket-amt{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:16px;color:var(--teal-deep);margin-top:4px;}
+.ticket-meta{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);margin-top:5px;line-height:1.7;}
+.ticket-actions{display:flex;gap:2px;flex-shrink:0;}
+.ticket-icon-btn{
+  background:none;border:none;color:#A79B79;
+  font-size:14px;cursor:pointer;line-height:1;padding:4px 6px;border-radius:4px;
+}
+.ticket-icon-btn:hover{background:var(--paper-2);color:var(--teal-deep);}
+.ticket-icon-del:hover{color:var(--coral);}
+.ticket-fx{color:var(--gold);}
+
+.empty-state{
+  text-align:center;padding:34px 12px;color:var(--ink-soft);
+  font-family:'IBM Plex Mono',monospace;font-size:12.5px;line-height:1.8;
+}
+
+.ticket-list{
+  max-height:480px;
+  overflow-y:auto;
+  padding-right:6px;
+  margin-right:-6px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--gold) var(--paper-2);
+}
+.ticket-list::-webkit-scrollbar{width:7px;}
+.ticket-list::-webkit-scrollbar-track{background:var(--paper-2);border-radius:6px;}
+.ticket-list::-webkit-scrollbar-thumb{background:var(--gold);border-radius:6px;}
+.ticket-list::-webkit-scrollbar-thumb:hover{background:var(--teal);}
+.ticket-list .ticket:last-child{margin-bottom:2px;}
+
+/* ===== Settlement ===== */
+.stat-strip{display:flex;gap:10px;margin-bottom:16px;}
+.stat-box{
+  flex:1;background:var(--ink);color:var(--paper);border-radius:8px;padding:14px 16px;
+}
+.stat-box .v{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:var(--gold);}
+.stat-box .l{font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,242,230,0.65);margin-top:3px;}
+
+.balance-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;
+}
+.balance-row:last-child{border-bottom:none;}
+.balance-amt{font-family:'IBM Plex Mono',monospace;font-weight:700;}
+.balance-amt.pos{color:var(--teal-deep);}
+.balance-amt.neg{color:var(--coral);}
+.balance-amt.zero{color:var(--ink-soft);font-weight:400;}
+
+.settle-ticket{
+  display:flex;align-items:center;gap:10px;
+  background:var(--paper);border:1px dashed var(--gold);border-radius:6px;
+  padding:12px 14px;margin-bottom:9px;
+  font-family:'IBM Plex Mono',monospace;font-size:13.5px;
+}
+.settle-arrow{color:var(--gold);font-size:15px;}
+.settle-amt{margin-left:auto;font-weight:700;color:var(--coral);font-size:15px;}
+
+.member-card{
+  border:1px solid var(--line);
+  border-radius:8px;
+  overflow:hidden;
+}
+.member-grid{display:grid;grid-template-columns:1fr;gap:12px;}
+@media (min-width:540px){
+  .member-grid{grid-template-columns:1fr 1fr;}
+}
+.member-card-head{
+  display:flex;align-items:center;gap:10px;
+  background:var(--ink);
+  color:var(--paper);
+  padding:11px 14px;
+}
+.member-avatar{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--gold);color:var(--ink);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Fraunces',serif;font-weight:700;font-size:14px;
+  flex-shrink:0;
+}
+.member-name{font-family:'Fraunces',serif;font-weight:600;font-size:15.5px;flex:1;}
+.member-paid{font-family:'IBM Plex Mono',monospace;font-size:12px;color:rgba(247,242,230,0.8);white-space:nowrap;}
+.member-paid b{color:var(--gold);}
+.member-card-body{padding:10px 14px;background:var(--white);}
+.member-paid-row{
+  padding:8px 14px;background:var(--paper-2);
+  font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);
+  border-bottom:1px solid var(--line);
+}
+.member-paid-row b{color:var(--teal-deep);}
+.detail-copy-btn{
+  background:rgba(247,242,230,0.12);
+  border:1px solid rgba(247,242,230,0.3);
+  color:var(--paper);
+  font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;
+  padding:4px 9px;border-radius:4px;cursor:pointer;flex-shrink:0;white-space:nowrap;
+}
+.detail-copy-btn:hover{background:rgba(247,242,230,0.22);}
+.detail-scroll{
+  max-height:220px;
+  overflow-y:auto;
+  scrollbar-width:thin;
+  scrollbar-color:var(--gold) var(--paper-2);
+}
+.detail-scroll::-webkit-scrollbar{width:6px;}
+.detail-scroll::-webkit-scrollbar-track{background:var(--paper-2);border-radius:6px;}
+.detail-scroll::-webkit-scrollbar-thumb{background:var(--gold);border-radius:6px;}
+.detail-scroll::-webkit-scrollbar-thumb:hover{background:var(--teal);}
+.mc-row{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 0;border-bottom:1px solid var(--line);
+  font-size:13.5px;
+}
+.mc-row:last-child{border-bottom:none;}
+.mc-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.mc-in .mc-dot{background:var(--teal);}
+.mc-out .mc-dot{background:var(--coral);}
+.mc-amt{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:13.5px;}
+.mc-in-amt{color:var(--teal-deep);}
+.mc-out-amt{color:var(--coral);}
+.mc-empty{
+  text-align:center;padding:12px 0;color:var(--ink-soft);
+  font-family:'IBM Plex Mono',monospace;font-size:12px;
+}
+
+.detail-row{
+  display:flex;justify-content:space-between;align-items:center;gap:8px;
+  padding:8px 0;border-bottom:1px solid var(--line);
+  font-size:13.5px;
+}
+.detail-row:last-child{border-bottom:none;}
+.detail-row-main{display:flex;align-items:center;gap:6px;flex:1;min-width:0;}
+.detail-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;}
+.detail-paid-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:9.5px;
+  background:var(--teal);color:var(--white);
+  padding:2px 6px;border-radius:10px;flex-shrink:0;white-space:nowrap;
+}
+.detail-payer{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-soft);
+  flex-shrink:0;white-space:nowrap;
+}
+.detail-amt{
+  font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:13.5px;
+  color:var(--ink);flex-shrink:0;text-align:right;
+}
+.detail-amt small{font-weight:400;color:var(--gold);font-size:10px;}
+
+.btn-secondary{
+  margin-top:14px;
+  padding:9px 16px;
+  background:var(--white);
+  color:var(--teal-deep);
+  border:1px solid var(--teal);
+  border-radius:6px;
+  font-family:'IBM Plex Mono',monospace;
+  font-weight:600;
+  font-size:12.5px;
+  cursor:pointer;
+}
+.btn-secondary:hover{background:var(--paper-2);}
+.btn-secondary:disabled{opacity:0.6;cursor:wait;}
+
+.card-danger{border-color:var(--coral);background:#FFFBF9;}
+.card-danger h2{color:var(--coral);}
+.btn-danger{
+  margin-top:6px;
+  padding:11px 16px;
+  background:var(--white);
+  color:var(--coral);
+  border:1px solid var(--coral);
+  border-radius:6px;
+  font-family:'IBM Plex Mono',monospace;
+  font-weight:600;
+  font-size:13px;
+  cursor:pointer;
+}
+.btn-danger:hover{background:var(--coral);color:var(--white);}
+.btn-danger:disabled{opacity:0.6;cursor:wait;}
+.rate-updated{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);
+  margin-top:8px;
+}
+.rate-error{
+  font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--coral);
+  margin-top:8px;background:#FBEAE5;border:1px solid var(--coral);border-radius:5px;padding:8px 10px;
+}
+
+.rates-grid{display:flex;flex-direction:column;gap:9px;margin-top:12px;}
+.rates-scroll{
+  max-height:260px;
+  overflow-y:auto;
+  padding-right:6px;
+  margin-right:-6px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--gold) var(--paper-2);
+}
+.rates-scroll::-webkit-scrollbar{width:7px;}
+.rates-scroll::-webkit-scrollbar-track{background:var(--paper-2);border-radius:6px;}
+.rates-scroll::-webkit-scrollbar-thumb{background:var(--gold);border-radius:6px;}
+.rates-scroll::-webkit-scrollbar-thumb:hover{background:var(--teal);}
+
+.conv-swap-btn{
+  width:34px;height:34px;border-radius:50%;
+  background:var(--paper);border:1px solid var(--line);
+  color:var(--teal-deep);font-size:16px;cursor:pointer;
+}
+.conv-swap-btn:hover{background:var(--paper-2);}
+.conv-result{
+  margin-top:14px;padding:14px;
+  background:var(--ink);color:var(--paper);
+  border-radius:6px;text-align:center;
+  font-family:'IBM Plex Mono',monospace;font-size:14px;
+}
+.conv-result b{color:var(--gold);font-size:16px;}
+.rate-row{display:flex;align-items:center;gap:10px;}
+.rate-row .cur{width:52px;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:13px;flex-shrink:0;}
+.rate-row .eq{color:var(--ink-soft);font-size:12px;flex-shrink:0;}
+.rate-row input{flex:1;}
+
+.footer-note{
+  text-align:center;font-size:11px;color:var(--ink-soft);margin-top:22px;
+  font-family:'IBM Plex Mono',monospace;line-height:1.8;
+}
+.savebadge{
+  position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:var(--ink);color:var(--gold);font-family:'IBM Plex Mono',monospace;
+  font-size:11.5px;padding:8px 16px;border-radius:20px;
+  transition:transform .25s ease;box-shadow:0 6px 18px rgba(0,0,0,0.25);
+  pointer-events:none;
+}
+.savebadge.show{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<div class="savebadge" id="saveBadge">已儲存</div>
+
+<script>
+/* ---------- 狀態 ---------- */
+const CURRENCIES = ['TWD','USD','JPY','KRW','CNY','HKD','EUR','THB','GBP','AUD'];
+const DEFAULT_RATES = {TWD:1,USD:31.5,JPY:0.205,KRW:0.0226,CNY:4.35,HKD:4.02,EUR:34.2,THB:0.87,GBP:39.8,AUD:20.5};
+
+let state = null;
+let activeTab = 'add';
+let saveTimer = null;
+let roomId = null;
+let appPhase = 'loading'; // 'loading' | 'setup' | 'app'
+let setupError = null;
+let setupBusy = false;
+let joinCodeDraft = '';
+let isRoomOwner = false; // 目前這個連結是不是「建立者專用的管理連結」打開的
+let ownerTokenDraft = null; // 建立房間流程中，還沒正式寫入雲端前暫存的管理密鑰
+let showOwnerReminder = false; // 剛建立完房間、還沒保存管理連結前，顯示提醒橫幅
+
+// 新的儲存後端：Firebase Realtime Database（規則已開放讀寫，不需要金鑰）
+const FIREBASE_DB_URL = 'https://trip-splitter-9e618-default-rtdb.asia-southeast1.firebasedatabase.app';
+
+// 舊的 JSONBin.io 後端，只保留用來搬遷「換後端之前」建立的舊房間資料
+const JSONBIN_BASE = 'https://api.jsonbin.io/v3/b';
+const JSONBIN_MASTER_KEY = '$2a$10$0caMijUGTZB7Bg2FfLmdy.2x7Q1RzP5/qcg5z6eIY4aNA6pJ80Scy';
+
+function defaultState(){
+  return {
+    tripTitle:'我的旅行分帳',
+    baseCurrency:'TWD',
+    people:['我','夥伴2','夥伴3','夥伴4'],
+    rates:{...DEFAULT_RATES},
+    expenses:[]
+  };
+}
+
+/* ---------- 雲端房間儲存 (Firebase Realtime Database) ---------- */
+function describeNetworkError(e){
+  const raw = (e && e.message) || String(e);
+  if(/Failed to fetch|NetworkError|Load failed/i.test(raw)){
+    return '連不到同步服務（原始錯誤：' + raw + '）。如果你是在 Claude 對話框裡的「預覽視窗」測試，這是正常的——預覽視窗基於安全考量會擋掉對外部網站的連線。請先把這個檔案下載下來，直接用瀏覽器開啟（或上傳到你自己的網頁空間）再試一次。';
+  }
+  return raw;
+}
+
+async function safeErrorText(res){
+  try{
+    const j = await res.json();
+    return j && j.message ? j.message : '';
+  }catch(e){
+    return '';
+  }
+}
+
+function generateRoomId(){
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+function generateOwnerToken(){
+  return Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 10);
+}
+
+// 幫 fetch 加上逾時保護：連線太久沒回應就直接判定失敗，不會讓畫面無限卡住
+function fetchWithTimeout(url, options, timeoutMs = 12000){
+  return Promise.race([
+    fetch(url, options),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('連線逾時，請檢查網路連線或稍後再試')), timeoutMs))
+  ]);
+}
+
+async function firebaseGet(id){
+  const res = await fetchWithTimeout(`${FIREBASE_DB_URL}/rooms/${id}.json`);
+  if(!res.ok){
+    throw new Error('讀取失敗，伺服器回應代碼 ' + res.status);
+  }
+  return await res.json(); // 不存在時回傳 null
+}
+
+async function firebaseSet(id, value){
+  const res = await fetchWithTimeout(`${FIREBASE_DB_URL}/rooms/${id}.json`, {
+    method:'PUT',
+    headers:{ 'Content-Type':'application/json' },
+    body: JSON.stringify(value)
+  });
+  if(!res.ok){
+    throw new Error('儲存失敗，伺服器回應代碼 ' + res.status);
+  }
+}
+
+async function firebaseDelete(id){
+  const res = await fetchWithTimeout(`${FIREBASE_DB_URL}/rooms/${id}.json`, { method:'DELETE' });
+  if(!res.ok){
+    throw new Error('刪除失敗，伺服器回應代碼 ' + res.status);
+  }
+}
+
+// 只在新房間讀不到資料時，嘗試從舊的 JSONBin 房間讀一次做搬遷；失敗就當作沒有舊資料，不影響流程
+async function tryMigrateLegacyRoom(id){
+  try{
+    const res = await fetchWithTimeout(`${JSONBIN_BASE}/${id}/latest`, {
+      headers:{ 'X-Master-Key': JSONBIN_MASTER_KEY }
+    }, 8000);
+    if(!res.ok) return null;
+    const data = await res.json();
+    return data && data.record ? data.record : null;
+  }catch(e){
+    return null;
+  }
+}
+
+async function deleteRoomForever(){
+  if(deletingRoom) return;
+  if(!isRoomOwner){
+    deleteRoomError = '只有建立這個房間的人才能刪除，請改用建立當時給你的「管理連結」打開這個房間。';
+    render();
+    return;
+  }
+  const ok = confirm('確定要永久刪除這個房間嗎？\n\n所有人都會無法再打開這個房間，記帳資料也無法復原。請先確認大家都對好帳了。');
+  if(!ok) return;
+  deletingRoom = true;
+  deleteRoomError = null;
+  render();
+  try{
+    await firebaseDelete(roomId);
+    roomId = null;
+    state = null;
+    isRoomOwner = false;
+    appPhase = 'setup';
+    setupError = null;
+    history.replaceState(null, '', location.pathname);
+  }catch(e){
+    console.error('刪除房間失敗', e);
+    deleteRoomError = describeNetworkError(e);
+  }finally{
+    deletingRoom = false;
+    render();
+  }
+}
+
+function roomUrl(id){
+  const url = new URL(location.href);
+  url.searchParams.set('room', id);
+  url.searchParams.delete('owner'); // 一般分享連結絕對不能帶到管理密鑰
+  return url.toString();
+}
+
+function ownerRoomUrl(id, token){
+  const url = new URL(location.href);
+  url.searchParams.set('room', id);
+  url.searchParams.set('owner', token);
+  return url.toString();
+}
+
+async function copyOwnerLink(btn, resetText){
+  try{
+    await navigator.clipboard.writeText(ownerRoomUrl(roomId, state.ownerToken));
+    if(btn){
+      btn.textContent = '已複製 ✓';
+      setTimeout(()=>{ btn.textContent = resetText; }, 1500);
+    }
+  }catch(e){
+    flashSaved('複製失敗，請手動複製網址列連結');
+  }
+}
+
+function dismissOwnerReminder(){
+  showOwnerReminder = false;
+  render();
+}
+
+const STALE_ROOM_DAYS = 90; // 房間超過幾天沒有任何活動，就會在有人造訪建立/加入畫面時被順手清理
+
+async function initApp(){
+  const params = new URLSearchParams(location.search);
+  const urlRoom = params.get('room');
+  if(urlRoom){
+    roomId = urlRoom;
+    await enterRoom();
+  }else{
+    appPhase = 'setup';
+    render();
+    sweepStaleRooms(); // 背景執行，不阻塞畫面、不用等待、失敗也沒關係
+  }
+}
+
+// 背景機會性清理：只刪除「有記錄到活動時間、且已超過門檻天數」的房間，
+// 沒有活動時間紀錄的房間（例如加了這個功能之前建立的）一律不動，避免誤刪
+async function sweepStaleRooms(){
+  try{
+    const cutoff = Date.now() - STALE_ROOM_DAYS * 24 * 60 * 60 * 1000;
+    const url = `${FIREBASE_DB_URL}/rooms.json?orderBy=${encodeURIComponent('"lastActiveAt"')}&endAt=${cutoff}`;
+    const res = await fetchWithTimeout(url, undefined, 8000);
+    if(!res.ok) return;
+    const data = await res.json();
+    if(!data) return;
+    const staleIds = Object.keys(data).filter(id =>
+      typeof data[id].lastActiveAt === 'number' && data[id].lastActiveAt < cutoff
+    );
+    for(const id of staleIds){
+      try{ await firebaseDelete(id); }catch(e){ /* 單筆失敗就跳過，不影響其他房間 */ }
+    }
+  }catch(e){
+    console.error('背景清理略過（不影響使用）', e);
+  }
+}
+
+async function enterRoom(){
+  appPhase = 'loading';
+  render();
+  const params = new URLSearchParams(location.search);
+  const urlOwnerToken = params.get('owner');
+  try{
+    let record = await firebaseGet(roomId);
+    if(!record){
+      // 新房間找不到資料，嘗試從舊的 JSONBin 房間搬過來（如果這個房間代碼是換後端之前建立的）
+      const legacy = await tryMigrateLegacyRoom(roomId);
+      if(legacy){
+        record = legacy;
+      }
+    }
+    state = record || defaultState();
+    // 沒有管理密鑰的房間（換後端/舊功能建立的）沿用舊行為，任何人都能刪除；
+    // 有管理密鑰的房間，只有網址帶對密鑰的人才算擁有者
+    isRoomOwner = !state.ownerToken || (urlOwnerToken !== null && urlOwnerToken === state.ownerToken);
+    // 進房間也算一次活動，順便更新/補上活動時間戳記
+    await firebaseSet(roomId, { ...state, lastActiveAt: Date.now() });
+    appPhase = 'app';
+    // 網址列固定只顯示一般連結，不會因為你是擁有者就偷偷把管理密鑰露在網址列上
+    // （避免有人直接從網址列複製分享，不小心把刪除權限也一起傳出去）
+    history.replaceState(null, '', roomUrl(roomId));
+  }catch(e){
+    console.error('進入房間失敗', e);
+    setupError = describeNetworkError(e);
+    appPhase = 'setup';
+    roomId = null;
+  }
+  render();
+}
+
+async function createNewRoom(){
+  if(setupBusy) return;
+  setupBusy = true;
+  setupError = null;
+  roomCreatedAutoCopied = false;
+  createdRoomError = null;
+  render();
+  try{
+    // 這裡只在本機產生房間代碼，還不會真的寫進雲端資料庫——
+    // 要等使用者按下「進入房間」確認後才會真正建立，避免建了忘記用、留下孤兒房間占額度
+    const id = generateRoomId();
+    roomId = id;
+    state = defaultState();
+    ownerTokenDraft = generateOwnerToken();
+    try{
+      await navigator.clipboard.writeText(roomUrl(roomId));
+      roomCreatedAutoCopied = true;
+    }catch(e){
+      roomCreatedAutoCopied = false;
+    }
+    appPhase = 'created';
+  }catch(e){
+    console.error('準備房間失敗', e);
+    setupError = describeNetworkError(e);
+  }finally{
+    setupBusy = false;
+    render();
+  }
+}
+
+async function enterCreatedRoom(){
+  if(createdRoomBusy) return;
+  createdRoomBusy = true;
+  createdRoomError = null;
+  render();
+  try{
+    // 真正把房間寫進雲端資料庫，房間到這一步才算正式成立
+    await firebaseSet(roomId, { ...state, lastActiveAt: Date.now(), ownerToken: ownerTokenDraft });
+    state.ownerToken = ownerTokenDraft;
+    isRoomOwner = true;
+    showOwnerReminder = true;
+    // 網址列一樣固定顯示一般連結，管理密鑰只存在記憶體裡，不會露在網址列
+    history.replaceState(null, '', roomUrl(roomId));
+    appPhase = 'app';
+  }catch(e){
+    console.error('建立房間失敗', e);
+    createdRoomError = describeNetworkError(e);
+  }finally{
+    createdRoomBusy = false;
+    render();
+  }
+}
+
+async function joinRoom(){
+  if(setupBusy) return;
+  const code = joinCodeDraft.trim();
+  if(!code) return;
+  // 允許貼完整連結或純房間代碼，自動抓出房間代碼
+  let id = code;
+  try{
+    const url = new URL(code);
+    const r = url.searchParams.get('room');
+    if(r) id = r;
+  }catch(e){
+    // 不是完整網址，就當作直接貼的是房間代碼
+  }
+  roomId = id;
+  await enterRoom();
+}
+
+function saveState(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async ()=>{
+    try{
+      await firebaseSet(roomId, { ...state, lastActiveAt: Date.now() });
+      flashSaved('已儲存');
+    }catch(e){
+      console.error('儲存失敗', e);
+      flashSaved('儲存失敗，請檢查網路連線');
+    }
+  }, 250);
+}
+
+function flashSaved(msg){
+  const b = document.getElementById('saveBadge');
+  if(!b) return;
+  b.textContent = msg || '已儲存';
+  b.classList.add('show');
+  clearTimeout(flashSaved._t);
+  flashSaved._t = setTimeout(()=>b.classList.remove('show'), 1600);
+}
+
+/* ---------- 表單暫存 (新增一筆) ---------- */
+let draft = {title:'', amount:'', currency:null, payer:0, participants:null};
+let fetchingRates = false;
+let rateFetchError = null;
+let editingId = null;
+let deletingRoom = false;
+let deleteRoomError = null;
+let convAmount = '1';
+let convFrom = null;
+let convTo = null;
+let roomCreatedAutoCopied = false;
+let createdRoomBusy = false;
+let createdRoomError = null;
+
+function resetDraft(){
+  draft = {
+    title:'',
+    amount:'',
+    currency: state.baseCurrency,
+    payer:0,
+    participants: state.people.map((_,i)=>i)
+  };
+}
+
+/* ---------- 換算 & 計算 ---------- */
+function toBase(amount, currency){
+  const r = state.rates[currency] ?? 1;
+  return amount * r;
+}
+
+// 任意兩個幣別之間互換：先換成基準幣別，再換成目標幣別
+function convertAmount(amount, fromCur, toCur){
+  const baseAmt = toBase(amount, fromCur);
+  const toRate = state.rates[toCur] ?? 1;
+  return toRate ? baseAmt / toRate : 0;
+}
+
+function computeBalances(){
+  // balances[i] = 已付(base) - 應付(base)
+  const balances = state.people.map(()=>0);
+  state.expenses.forEach(e=>{
+    const baseAmt = toBase(e.amount, e.currency);
+    const n = e.participants.length || 1;
+    const share = baseAmt / n;
+    balances[e.payer] += baseAmt;
+    e.participants.forEach(pIdx=>{ balances[pIdx] -= share; });
+  });
+  return balances;
+}
+
+function computePairwiseOwed(){
+  // owed[i][j] = i 直接欠 j 多少（base currency），依照每筆消費「參與人欠付款人」直接累加
+  const n = state.people.length;
+  const owed = Array.from({length:n}, ()=>Array(n).fill(0));
+  state.expenses.forEach(e=>{
+    const baseAmt = toBase(e.amount, e.currency);
+    const n2 = e.participants.length || 1;
+    const share = baseAmt / n2;
+    e.participants.forEach(p=>{
+      if(p !== e.payer){
+        owed[p][e.payer] += share;
+      }
+    });
+  });
+  return owed;
+}
+
+function netPairwise(owed){
+  const n = owed.length;
+  const net = Array.from({length:n}, ()=>Array(n).fill(0));
+  for(let i=0;i<n;i++){
+    for(let j=i+1;j<n;j++){
+      const diff = owed[i][j] - owed[j][i];
+      if(diff > 0.5) net[i][j] = diff;
+      else if(diff < -0.5) net[j][i] = -diff;
+    }
+  }
+  return net;
+}
+
+function simplifyDebts(balances){
+  const creditors = [];
+  const debtors = [];
+  balances.forEach((amt,i)=>{
+    if(amt > 0.5) creditors.push({person:i, amt});
+    else if(amt < -0.5) debtors.push({person:i, amt:-amt});
+  });
+  creditors.sort((a,b)=>b.amt-a.amt);
+  debtors.sort((a,b)=>b.amt-a.amt);
+  const tx = [];
+  let i=0,j=0;
+  while(i<debtors.length && j<creditors.length){
+    const pay = Math.min(debtors[i].amt, creditors[j].amt);
+    if(pay > 0.5){
+      tx.push({from:debtors[i].person, to:creditors[j].person, amount:pay});
+    }
+    debtors[i].amt -= pay;
+    creditors[j].amt -= pay;
+    if(debtors[i].amt <= 0.5) i++;
+    if(creditors[j].amt <= 0.5) j++;
+  }
+  return tx;
+}
+
+function totalSpent(){
+  return state.expenses.reduce((s,e)=>s+toBase(e.amount,e.currency),0);
+}
+
+// 只計算「全部出遊人數一起分攤」的消費，個人或部分人分攤的消費不算進這個總額
+function totalSpentSharedByAll(){
+  return state.expenses
+    .filter(e => e.participants.length === state.people.length)
+    .reduce((s,e)=>s+toBase(e.amount,e.currency),0);
+}
+
+function fmt(n){
+  return (Math.round(n*10)/10).toLocaleString('zh-Hant-TW',{maximumFractionDigits:1});
+}
+
+/* ---------- 匯出 CSV ---------- */
+function escapeCsvField(v){
+  const s = String(v ?? '');
+  if(/[",\n]/.test(s)){
+    return '"' + s.replace(/"/g,'""') + '"';
+  }
+  return s;
+}
+
+function csvRow(arr){
+  return arr.map(escapeCsvField).join(',');
+}
+
+function exportToCsv(){
+  const lines = [];
+  lines.push(csvRow([state.tripTitle]));
+  lines.push(csvRow(['基準幣別', state.baseCurrency]));
+  lines.push(csvRow(['出遊人數', state.people.length]));
+  lines.push(csvRow(['成員', state.people.join('、')]));
+  lines.push('');
+
+  lines.push(csvRow(['—— 消費紀錄 ——']));
+  lines.push(csvRow(['名目','金額','幣別',`換算後金額(${state.baseCurrency})`,'付款人','分攤人數',`每人分攤(${state.baseCurrency})`,'分攤成員']));
+  state.expenses.forEach(e=>{
+    const share = toBase(e.amount,e.currency)/(e.participants.length||1);
+    lines.push(csvRow([
+      e.title,
+      e.amount,
+      e.currency,
+      fmt(toBase(e.amount,e.currency)),
+      state.people[e.payer] ?? '（已刪除）',
+      e.participants.length,
+      fmt(share),
+      e.participants.map(i=>state.people[i]).filter(Boolean).join('、')
+    ]));
+  });
+  lines.push('');
+
+  lines.push(csvRow([`—— 每人淨額 (${state.baseCurrency}) ——`]));
+  lines.push(csvRow(['成員','淨額','狀態']));
+  const balances = computeBalances();
+  state.people.forEach((p,i)=>{
+    const b = balances[i];
+    const label = b>0.5 ? '可收回' : (b<-0.5 ? '需支付' : '已結清');
+    lines.push(csvRow([p, fmt(b), label]));
+  });
+  lines.push('');
+
+  lines.push(csvRow([`—— 結算明細（誰要付誰多少，${state.baseCurrency}）——`]));
+  lines.push(csvRow(['付款方','收款方','金額']));
+  const owed = computePairwiseOwed();
+  const net = netPairwise(owed);
+  let hasSettlement = false;
+  for(let i=0;i<state.people.length;i++){
+    for(let j=0;j<state.people.length;j++){
+      if(net[i][j] > 0.5){
+        lines.push(csvRow([state.people[i], state.people[j], fmt(net[i][j])]));
+        hasSettlement = true;
+      }
+    }
+  }
+  if(!hasSettlement){
+    lines.push(csvRow(['（目前帳務已經平衡，大家都不欠誰）']));
+  }
+  lines.push('');
+  lines.push(csvRow(['匯出時間', new Date().toLocaleString('zh-Hant-TW', {hour12:false})]));
+
+  // 開頭加上 UTF-8 BOM，確保 Excel 打開時中文不會變亂碼
+  const csvContent = '\uFEFF' + lines.join('\r\n');
+  const blob = new Blob([csvContent], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const safeTitle = (state.tripTitle || '分帳').replace(/[\\/:*?"<>|]/g, '_');
+  a.download = `${safeTitle}_分帳明細.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+}
+
+/* ---------- 事件處理 ---------- */
+function setTab(t){ activeTab = t; render(); }
+
+function changePeopleCount(delta){
+  const n = state.people.length + delta;
+  if(n < 2 || n > 20) return;
+  if(delta > 0){
+    state.people.push('夥伴'+n);
+  }else{
+    state.people.pop();
+    state.expenses.forEach(e=>{
+      if(e.payer >= state.people.length) e.payer = 0;
+      e.participants = e.participants.filter(p=>p < state.people.length);
+    });
+    // 人數變少時，表單裡還沒送出的草稿也要一起清掉超出範圍的選取，
+    // 不然殘留的舊索引存進新消費會讓結算計算整個壞掉
+    if(draft.payer >= state.people.length) draft.payer = 0;
+    draft.participants = draft.participants.filter(p=>p < state.people.length);
+  }
+  saveState(); render();
+}
+
+function updatePersonName(idx, val){
+  state.people[idx] = val || ('夥伴'+(idx+1));
+  saveState();
+}
+
+function updateBaseCurrency(val){
+  state.baseCurrency = val;
+  saveState(); render();
+}
+
+function updateRate(cur, val){
+  const v = parseFloat(val);
+  state.rates[cur] = isNaN(v) ? 0 : v;
+  saveState();
+}
+
+function updateTitle(val){
+  state.tripTitle = val;
+  saveState();
+}
+
+function toggleParticipant(idx){
+  const pos = draft.participants.indexOf(idx);
+  if(pos >= 0) draft.participants.splice(pos,1);
+  else draft.participants.push(idx);
+  renderAddTabOnly();
+}
+
+function selectAllParticipants(all){
+  draft.participants = all ? state.people.map((_,i)=>i) : [];
+  renderAddTabOnly();
+}
+
+function addExpense(){
+  const amt = parseFloat(draft.amount);
+  if(!draft.title.trim() || !amt || amt <= 0 || draft.participants.length === 0) return;
+
+  if(editingId !== null){
+    const idx = state.expenses.findIndex(e=>e.id===editingId);
+    if(idx !== -1){
+      state.expenses[idx] = {
+        ...state.expenses[idx],
+        title: draft.title.trim(),
+        amount: amt,
+        currency: draft.currency,
+        payer: draft.payer,
+        participants: [...draft.participants]
+      };
+    }
+    editingId = null;
+  }else{
+    state.expenses.unshift({
+      id: Date.now(),
+      title: draft.title.trim(),
+      amount: amt,
+      currency: draft.currency,
+      payer: draft.payer,
+      participants: [...draft.participants]
+    });
+  }
+  saveState();
+  resetDraft();
+  render();
+}
+
+function startEditExpense(id){
+  const e = state.expenses.find(x=>x.id===id);
+  if(!e) return;
+  editingId = id;
+  draft = {
+    title: e.title,
+    amount: String(e.amount),
+    currency: e.currency,
+    payer: e.payer,
+    participants: [...e.participants]
+  };
+  activeTab = 'add';
+  render();
+  const card = document.querySelector('.card');
+  if(card) card.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function cancelEdit(){
+  editingId = null;
+  resetDraft();
+  render();
+}
+
+function deleteExpense(id){
+  state.expenses = state.expenses.filter(e=>e.id!==id);
+  if(editingId === id){ editingId = null; resetDraft(); }
+  saveState(); render();
+}
+
+async function fetchLiveRates(){
+  if(fetchingRates) return;
+  fetchingRates = true;
+  rateFetchError = null;
+  renderAddTabOnly();
+
+  try{
+    const res = await fetch(`https://open.er-api.com/v6/latest/${state.baseCurrency}`);
+    if(!res.ok) throw new Error('匯率服務回應錯誤 ' + res.status);
+    const data = await res.json();
+    if(data.result !== 'success' || !data.rates) throw new Error('匯率服務回傳格式異常');
+
+    const currencies = CURRENCIES.filter(c=>c!==state.baseCurrency);
+    let updated = 0;
+    currencies.forEach(c=>{
+      const perBase = data.rates[c]; // 1 個 baseCurrency = perBase 個 c
+      if(typeof perBase === 'number' && isFinite(perBase) && perBase > 0){
+        state.rates[c] = 1 / perBase; // 換成我們的慣例：1 個 c = 多少 baseCurrency
+        updated++;
+      }
+    });
+    state.rates[state.baseCurrency] = 1;
+
+    if(updated === 0){
+      rateFetchError = '沒有取得到任何幣別的匯率，請稍後再試，或先手動輸入。';
+    }else{
+      state.ratesUpdatedAt = new Date().toLocaleString('zh-Hant-TW', {hour12:false});
+      saveState();
+    }
+  }catch(e){
+    console.error('更新匯率失敗', e);
+    rateFetchError = describeNetworkError(e);
+  }finally{
+    fetchingRates = false;
+    renderAddTabOnly();
+  }
+}
+
+async function refreshFromShared(){
+  const btn = document.getElementById('refreshBtn');
+  if(btn){ btn.disabled = true; btn.textContent = '同步中…'; }
+  try{
+    const incoming = await firebaseGet(roomId);
+    if(incoming){
+      if(JSON.stringify(incoming) === JSON.stringify(state)){
+        flashSaved('已經是最新資料');
+      }else{
+        state = incoming;
+        editingId = null;
+        resetDraft();
+        render();
+        flashSaved('已同步大家的最新紀錄');
+        return; // render() already rebuilds the header/button
+      }
+    }else{
+      flashSaved('目前房間裡還沒有資料');
+    }
+  }catch(e){
+    console.error('同步失敗', e);
+    flashSaved('同步失敗，請檢查網路連線');
+  }finally{
+    const b = document.getElementById('refreshBtn');
+    if(b){ b.disabled = false; b.textContent = '⟳ 同步'; }
+  }
+}
+
+/* ---------- Render ---------- */
+function render(){
+  const app = document.getElementById('app');
+
+  if(appPhase === 'loading'){
+    app.innerHTML = renderLoadingScreen();
+    return;
+  }
+  if(appPhase === 'setup'){
+    app.innerHTML = renderSetupScreen();
+    bindSetupEvents();
+    return;
+  }
+  if(appPhase === 'created'){
+    app.innerHTML = renderRoomCreatedScreen();
+    bindRoomCreatedEvents();
+    return;
+  }
+
+  app.innerHTML = `
+    ${renderHeader()}
+    ${showOwnerReminder ? renderOwnerReminderBanner() : ''}
+    ${renderTabs()}
+    <div id="tabContent">${renderTabContent()}</div>
+    <div class="footer-note">⚠ 共用房間・任何拿到這個連結的人都能檢視及編輯這份紀錄・匯率可一鍵抓即時匯率，或自行手動修改</div>
+  `;
+  bindGlobalEvents();
+}
+
+function renderOwnerReminderBanner(){
+  return `
+  <div class="owner-reminder">
+    <div class="owner-reminder-text">
+      🔑 <strong>提醒：</strong>重新整理頁面後，這個分頁就會失去刪除房間的權限。建議現在就複製你的專屬管理連結保存起來（例如貼到自己的備忘錄），之後才刪得掉這個房間。
+    </div>
+    <div class="owner-reminder-actions">
+      <button class="btn-secondary" id="reminderCopyBtn" style="padding:8px 12px;font-size:11.5px;">複製管理連結</button>
+      <button class="link-btn" id="reminderDismissBtn">知道了，先關掉</button>
+    </div>
+  </div>`;
+}
+
+function renderLoadingScreen(){
+  return `
+  <div class="setup-screen">
+    <p class="setup-eyebrow">Trip Ledger · 旅行分帳票根</p>
+    <div class="setup-loading">連線到房間中…</div>
+  </div>`;
+}
+
+function renderSetupScreen(){
+  return `
+  <div class="setup-screen">
+    <p class="setup-eyebrow">Trip Ledger · 旅行分帳票根</p>
+    <h1 class="setup-title">出遊分帳票根</h1>
+    <p class="setup-sub">建立一個房間，把連結或房間代碼分享給一起出遊的人，大家就能一起記帳、看到同一份結算結果。</p>
+
+    <div class="setup-card">
+      <h2>建立新房間</h2>
+      <p class="section-note">開始一趟新旅行，建立一個新房間，之後把產生的連結傳給同行的人。</p>
+      <p class="section-note create-room-hint">⏱ 房間連續 ${STALE_ROOM_DAYS} 天沒有任何人使用（記帳、開啟房間等）的話，會被系統自動清除，記得旅行期間偶爾回來看看、保持房間有在使用。</p>
+      <button class="btn-primary" id="createRoomBtn" ${setupBusy?'disabled':''}>${setupBusy ? '建立中…' : '✈ 建立新房間'}</button>
+    </div>
+
+    <div class="setup-card">
+      <h2>加入已存在的房間</h2>
+      <p class="section-note">如果朋友已經傳給你連結，直接點連結就好；如果只有拿到「房間代碼」，貼在這裡加入。</p>
+      <label>房間連結或房間代碼</label>
+      <input type="text" id="joinCodeInput" placeholder="貼上連結或房間代碼" value="${escapeHtml(joinCodeDraft)}">
+      <button class="btn-secondary" id="joinRoomBtn" style="width:100%;text-align:center;margin-top:10px;" ${setupBusy?'disabled':''}>加入房間</button>
+    </div>
+
+    ${setupError ? `<div class="rate-error">${escapeHtml(setupError)}</div>` : ''}
+
+    <p class="setup-note">＊任何拿到連結或房間代碼的人都能檢視及編輯這份帳本，沒有帳號登入機制，請只分享給信任的同行夥伴。</p>
+    <p class="setup-note">＊如果是在 Claude 對話框裡的「預覽視窗」操作失敗，這是正常的——預覽視窗基於安全考量會擋掉對外部網站的連線。請先下載這個檔案，直接用瀏覽器開啟（或上傳到你自己的網頁空間）再試一次。</p>
+  </div>`;
+}
+
+function bindSetupEvents(){
+  const createBtn = document.getElementById('createRoomBtn');
+  if(createBtn) createBtn.onclick = createNewRoom;
+
+  const joinInput = document.getElementById('joinCodeInput');
+  if(joinInput) joinInput.oninput = (e)=>{ joinCodeDraft = e.target.value; };
+
+  const joinBtn = document.getElementById('joinRoomBtn');
+  if(joinBtn) joinBtn.onclick = joinRoom;
+}
+
+function renderRoomCreatedScreen(){
+  const url = roomUrl(roomId);
+  return `
+  <div class="setup-screen">
+    <p class="setup-eyebrow">Trip Ledger · 旅行分帳票根</p>
+    <div class="setup-card created-card">
+      <h2>🎉 房間準備好了，還差最後一步</h2>
+      <p class="section-note created-warning">⚠ 房間目前還「沒有」真正建立，要按下面「進入房間」才會正式寫進雲端、開始存在。請先複製或收藏這個連結，再按下去確認——如果直接離開這個畫面，房間就當作沒建立過，之後也找不回來（但這樣也不會留下沒人用的房間占額度）。</p>
+      ${roomCreatedAutoCopied ? `<div class="rate-updated" style="text-align:center;margin-bottom:10px;">✓ 已經自動幫你複製到剪貼簿了，保險起見也可以再按一次下面按鈕</div>` : ''}
+      <label>房間連結</label>
+      <input type="text" id="createdRoomLink" readonly value="${escapeHtml(url)}" onclick="this.select()">
+      <button class="btn-secondary" id="copyCreatedLinkBtn" style="width:100%;text-align:center;margin-top:10px;">複製連結</button>
+      <button class="btn-primary" id="enterRoomBtn" style="margin-top:16px;" ${createdRoomBusy?'disabled':''}>${createdRoomBusy ? '建立中…' : '✓ 我已經複製好了，正式建立並進入房間'}</button>
+      ${createdRoomError ? `<div class="rate-error">${escapeHtml(createdRoomError)}</div>` : ''}
+      <p class="section-note" style="margin-top:14px;text-align:center;">進入房間後，這個瀏覽器分頁在重新整理之前都具備刪除權限；重新整理、換裝置或想先備份，可以到「出遊成員」分頁的「房間管理」裡複製你的專屬管理連結保存起來。</p>
+    </div>
+  </div>`;
+}
+
+function bindRoomCreatedEvents(){
+  const copyBtn = document.getElementById('copyCreatedLinkBtn');
+  if(copyBtn) copyBtn.onclick = async ()=>{
+    try{
+      await navigator.clipboard.writeText(roomUrl(roomId));
+      copyBtn.textContent = '已複製 ✓';
+      setTimeout(()=>{ copyBtn.textContent = '複製連結'; }, 1500);
+    }catch(e){
+      const input = document.getElementById('createdRoomLink');
+      if(input){ input.select(); }
+    }
+  };
+
+  const enterBtn = document.getElementById('enterRoomBtn');
+  if(enterBtn) enterBtn.onclick = enterCreatedRoom;
+}
+
+function renderAddTabOnly(){
+  document.getElementById('tabContent').innerHTML = renderTabContent();
+  bindGlobalEvents();
+}
+
+function renderHeader(){
+  return `
+  <div class="boardingpass">
+    <div class="room-badge-row">
+      <span class="room-badge">🔗 房間代碼：<b>${escapeHtml(roomId)}</b></span>
+      <button class="room-copy-btn" id="copyLinkBtn">複製連結</button>
+    </div>
+    <div class="bp-top">
+      <div style="flex:1;min-width:0;">
+        <p class="bp-eyebrow">Trip Ledger · 旅行分帳票根</p>
+        <input class="bp-title-input" id="tripTitleInput" type="text" value="${escapeHtml(state.tripTitle)}" placeholder="幫這趟旅行取個名字">
+      </div>
+      <div class="bp-stub">
+        <div class="num">$${fmt(totalSpentSharedByAll())}</div>
+        <div class="lbl">${state.baseCurrency} 全員均攤總花費</div>
+        <div class="lbl-avg">平均每人 $${fmt(totalSpentSharedByAll() / (state.people.length || 1))}</div>
+      </div>
+    </div>
+    <div class="bp-perforation"></div>
+    <div class="bp-bottom">
+      <div class="bp-people-edit">
+        <span>出遊人數</span>
+        <button id="peopleMinus">−</button>
+        <strong style="color:var(--paper);font-size:14px;">${state.people.length}</strong>
+        <button id="peoplePlus">＋</button>
+      </div>
+      <select class="bp-currency-select" id="baseCurrencySelect">
+        ${CURRENCIES.map(c=>`<option value="${c}" ${c===state.baseCurrency?'selected':''}>基準幣別 ${c}</option>`).join('')}
+      </select>
+      <button class="bp-refresh-btn" id="refreshBtn" title="重新載入大家的最新紀錄">⟳ 同步</button>
+    </div>
+  </div>`;
+}
+
+function renderTabs(){
+  const tabs = [
+    {id:'add', label:'✎ 記一筆'},
+    {id:'people', label:'☺ 出遊成員'},
+    {id:'settle', label:'⇄ 結算'},
+    {id:'detail', label:'📋 個人明細'}
+  ];
+  return `<div class="tabs">
+    ${tabs.map(t=>`<button class="tab-btn ${activeTab===t.id?'active':''}" data-tab="${t.id}">${t.label}</button>`).join('')}
+  </div>`;
+}
+
+function renderTabContent(){
+  if(activeTab==='people') return renderPeopleTab();
+  if(activeTab==='settle') return renderSettleTab();
+  if(activeTab==='detail') return renderDetailTab();
+  return renderAddTab();
+}
+
+function renderPeopleTab(){
+  if(!convFrom) convFrom = CURRENCIES.find(c=>c!==state.baseCurrency) || state.baseCurrency;
+  if(!convTo) convTo = state.baseCurrency;
+  return `
+  <div class="card">
+    <h2>出遊成員名單</h2>
+    <p class="section-note">目前共 ${state.people.length} 人一起出遊，可以幫每個人改個好記的名字。</p>
+    <div class="people-name-list">
+      ${state.people.map((p,i)=>`
+        <div class="people-name-row">
+          <span class="tag">${String(i+1).padStart(2,'0')}</span>
+          <input type="text" data-person-idx="${i}" class="person-name-input" value="${escapeHtml(p)}">
+        </div>
+      `).join('')}
+    </div>
+  </div>
+  <div class="card">
+    <h2>匯率換算</h2>
+    <p class="section-note">輸入金額、選好幣別，直接看換算結果，方便旅行中隨手估算價格。</p>
+    <div class="row">
+      <div>
+        <label>金額</label>
+        <input type="number" id="convAmount" placeholder="0" value="${convAmount}">
+      </div>
+      <div>
+        <label>從</label>
+        <select id="convFrom">
+          ${CURRENCIES.map(c=>`<option value="${c}" ${c===convFrom?'selected':''}>${c}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:center;margin:6px 0;">
+      <button class="conv-swap-btn" id="convSwapBtn" title="交換幣別">⇅</button>
+    </div>
+    <label>換成</label>
+    <select id="convTo">
+      ${CURRENCIES.map(c=>`<option value="${c}" ${c===convTo?'selected':''}>${c}</option>`).join('')}
+    </select>
+    <div class="conv-result" id="convResult">
+      ${convAmount ? `${escapeHtml(convAmount)} ${convFrom} ≈ <b>${fmt(convertAmount(parseFloat(convAmount)||0, convFrom, convTo))} ${convTo}</b>` : `輸入金額看換算結果`}
+    </div>
+  </div>
+  <div class="card">
+    <h2>匯率設定</h2>
+    <p class="section-note">基準幣別是 <strong>${state.baseCurrency}</strong>，數值代表「1 單位外幣 = 多少 ${state.baseCurrency}」，記帳選其他幣別時會自動換算。可以按下方按鈕直接抓網路上的最新匯率自動帶入，也可以隨時手動修改。</p>
+    <button class="btn-secondary" id="fetchRatesBtn" ${fetchingRates?'disabled':''}>
+      ${fetchingRates ? '正在查詢最新匯率…' : '↻ 更新即時匯率'}
+    </button>
+    ${state.ratesUpdatedAt ? `<div class="rate-updated">最後更新：${escapeHtml(state.ratesUpdatedAt)}</div>` : ''}
+    ${rateFetchError ? `<div class="rate-error">${escapeHtml(rateFetchError)}</div>` : ''}
+    <div class="rates-grid rates-scroll">
+      ${CURRENCIES.filter(c=>c!==state.baseCurrency).map(c=>`
+        <div class="rate-row">
+          <span class="cur">${c}</span>
+          <span class="eq">1 ${c} =</span>
+          <input type="number" step="0.001" data-rate-cur="${c}" value="${state.rates[c] ?? ''}">
+          <span class="eq">${state.baseCurrency}</span>
+        </div>
+      `).join('')}
+    </div>
+  </div>
+  <div class="card card-danger">
+    <h2>⚠ 房間管理</h2>
+    ${isRoomOwner ? `
+    <p class="section-note">你目前擁有這個房間的管理權限。想在別的裝置或分享給自己備份，可以複製下面的專屬管理連結——<strong>不要把它分享給別人</strong>，拿到這個連結的人就等於拿到刪除房間的權限。</p>
+    <button class="btn-secondary" id="copyOwnerLinkBtn" style="width:100%;text-align:center;margin-bottom:14px;">複製我的管理連結</button>
+    <p class="section-note">旅行結束、確定不會再用到這個房間了嗎？可以把它永久刪除，釋放共用同步額度給下一趟旅行用。<strong>刪除後所有人（包含你自己）都無法再打開這個房間，紀錄也無法復原</strong>，請先確認大家都對好帳了再刪。</p>
+    <button class="btn-danger" id="deleteRoomBtn" ${deletingRoom?'disabled':''}>${deletingRoom ? '刪除中…' : '🗑 永久刪除這個房間'}</button>
+    ` : `
+    <p class="section-note">🔒 只有建立這個房間的人才能刪除房間。如果你就是建立者，請改用當初建立房間時的瀏覽器分頁，或用那次自己保存的管理連結重新打開這個房間（一般分享連結沒有這個權限）。</p>
+    `}
+    ${deleteRoomError ? `<div class="rate-error">${escapeHtml(deleteRoomError)}</div>` : ''}
+  </div>`;
+}
+
+function renderAddTab(){
+  if(!draft.currency) resetDraft();
+  const otherCurrency = draft.currency !== state.baseCurrency;
+  const isEditing = editingId !== null;
+  return `
+  <div class="card">
+    <h2>${isEditing ? '✎ 編輯這筆消費' : '記一筆消費'}</h2>
+    <label>消費名目</label>
+    <input type="text" id="draftTitle" placeholder="例：晚餐、計程車、飯店..." value="${escapeHtml(draft.title)}">
+
+    <div class="row">
+      <div>
+        <label>消費總額</label>
+        <input type="number" id="draftAmount" placeholder="0" value="${draft.amount}">
+      </div>
+      <div>
+        <label>幣別</label>
+        <select id="draftCurrency">
+          ${CURRENCIES.map(c=>`<option value="${c}" ${c===draft.currency?'selected':''}>${c}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="section-note" id="conversionNote" style="margin-top:${otherCurrency && draft.amount ? '8px' : '0'};">${otherCurrency && draft.amount ? `≈ ${fmt(toBase(parseFloat(draft.amount)||0, draft.currency))} ${state.baseCurrency}（依目前匯率換算）` : ''}</div>
+
+    <label>誰先付的錢</label>
+    <select id="draftPayer">
+      ${state.people.map((p,i)=>`<option value="${i}" ${draft.payer===i?'selected':''}>${escapeHtml(p)}</option>`).join('')}
+    </select>
+
+    <label>這筆要由誰分攤（${draft.participants.length} 人平分）</label>
+    <div class="chip-group">
+      ${state.people.map((p,i)=>`<span class="chip ${draft.participants.includes(i)?'on':''}" data-toggle-participant="${i}">${escapeHtml(p)}</span>`).join('')}
+    </div>
+    <div class="chip-row-actions">
+      <button class="link-btn" id="selectAllBtn">全選</button>
+      <button class="link-btn" id="selectNoneBtn">全不選</button>
+    </div>
+
+    <button class="btn-primary" id="addExpenseBtn" ${(!draft.title.trim()||!draft.amount||draft.participants.length===0)?'disabled':''}>${isEditing ? '儲存修改' : '加入這筆消費'}</button>
+    ${isEditing ? `<button class="link-btn" id="cancelEditBtn" style="display:block;margin:10px auto 0;">取消修改</button>` : ''}
+  </div>
+
+  <div class="card">
+    <h2>消費紀錄（${state.expenses.length}）</h2>
+    <div class="ticket-list">
+      ${state.expenses.length===0 ? `<div class="empty-state">還沒有任何消費紀錄<br>從上面加入第一筆吧 ✈</div>` : state.expenses.map(e=>renderTicket(e, isEditing && e.id===editingId)).join('')}
+    </div>
+  </div>`;
+}
+
+function renderTicket(e, isBeingEdited){
+  const payerName = state.people[e.payer] ?? '（已刪除）';
+  const n = e.participants.length;
+  const share = n ? (toBase(e.amount,e.currency)/n) : 0;
+  const isForeign = e.currency !== state.baseCurrency;
+  const participantNames = e.participants.map(i=>state.people[i]).filter(Boolean).join('、');
+  return `
+  <div class="ticket ${isBeingEdited ? 'ticket-editing' : ''}">
+    <div class="ticket-top">
+      <span class="ticket-title">${escapeHtml(e.title)}</span>
+      <div class="ticket-actions">
+        <button class="ticket-icon-btn" data-edit-expense="${e.id}" title="修改">✎</button>
+        <button class="ticket-icon-btn ticket-icon-del" data-delete-expense="${e.id}" title="刪除">✕</button>
+      </div>
+    </div>
+    <div class="ticket-amt">${e.currency} ${fmt(e.amount)}</div>
+    <div class="ticket-meta">
+      ${escapeHtml(payerName)} 先付款 ・ ${n} 人平分 ・ 每人 ${fmt(share)} ${state.baseCurrency}
+      ${isForeign ? `<br><span class="ticket-fx">換算 ≈ ${fmt(toBase(e.amount,e.currency))} ${state.baseCurrency}</span>` : ''}
+      <br>分攤成員：${escapeHtml(participantNames || '—')}
+    </div>
+  </div>`;
+}
+
+function renderSettleTab(){
+  const balances = computeBalances();
+  const owed = computePairwiseOwed();
+  const net = netPairwise(owed);
+  return `
+  <div class="stat-strip">
+    <div class="stat-box">
+      <div class="v">$${fmt(totalSpent())}</div>
+      <div class="l">旅行總花費・含個人消費（${state.baseCurrency}）</div>
+    </div>
+    <div class="stat-box">
+      <div class="v">${state.expenses.length}</div>
+      <div class="l">消費筆數</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📥 匯出紀錄</h2>
+    <p class="section-note">把消費紀錄、每人淨額、結算明細整理成一份表格檔案下載下來，用 Excel、Google 試算表都能直接打開，方便留存或跟大家對帳。</p>
+    <button class="btn-secondary" id="exportCsvBtn" style="width:100%;text-align:center;">📊 匯出分帳表格（CSV）</button>
+  </div>
+
+  <div class="card">
+    <h2>每人淨額</h2>
+    <p class="section-note">正數＝別人還欠你的錢，負數＝你還欠別人的錢（已把所有消費互相抵銷後的淨額）。</p>
+    ${state.people.map((p,i)=>{
+      const b = balances[i];
+      const cls = b>0.5?'pos':(b<-0.5?'neg':'zero');
+      const label = b>0.5? '可收回' : (b<-0.5 ? '需支付' : '已結清');
+      return `<div class="balance-row">
+        <span>${escapeHtml(p)}</span>
+        <span class="balance-amt ${cls}">${b>0.5?'+':''}${fmt(b)} <small style="font-weight:400;font-size:10.5px;">${label}</small></span>
+      </div>`;
+    }).join('')}
+  </div>
+
+  <div class="card">
+    <h2>每人結算卡</h2>
+    <p class="section-note">這裡列出每個人跟「其他每一個人」之間實際的淨欠款，是依照大家實際一起分攤過的消費直接計算、互相抵銷後的結果——不是繞道由某個人代收代付的簡化版本，所以像夥伴4只要有跟夥伴2一起分攤過消費，兩人之間該收付的金額就會直接顯示在雙方卡片上。</p>
+    <div class="member-grid">
+      ${state.people.map((p,i)=>renderMemberCard(p,i,net)).join('')}
+    </div>
+  </div>`;
+}
+
+function renderMemberCard(name, idx, net){
+  const paid = totalPaidByPerson(idx);
+  const owedToMe = [];
+  const iOwe = [];
+  state.people.forEach((_,j)=>{
+    if(j===idx) return;
+    if(net[j][idx] > 0.5) owedToMe.push({person:j, amount:net[j][idx]});
+    if(net[idx][j] > 0.5) iOwe.push({person:j, amount:net[idx][j]});
+  });
+  owedToMe.sort((a,b)=>b.amount-a.amount);
+  iOwe.sort((a,b)=>b.amount-a.amount);
+  const initial = (name||'?').trim().charAt(0) || '?';
+  const rows = [
+    ...owedToMe.map(t=>`
+      <div class="mc-row mc-in">
+        <span class="mc-dot"></span>
+        <span>${escapeHtml(state.people[t.person])} 要付 ${escapeHtml(name)}</span>
+        <span class="mc-amt mc-in-amt">${state.baseCurrency} ${fmt(t.amount)}</span>
+      </div>`),
+    ...iOwe.map(t=>`
+      <div class="mc-row mc-out">
+        <span class="mc-dot"></span>
+        <span>${escapeHtml(name)} 要付 ${escapeHtml(state.people[t.person])}</span>
+        <span class="mc-amt mc-out-amt">${state.baseCurrency} ${fmt(t.amount)}</span>
+      </div>`)
+  ].join('');
+  return `
+  <div class="member-card">
+    <div class="member-card-head">
+      <span class="member-avatar">${escapeHtml(initial)}</span>
+      <span class="member-name">${escapeHtml(name)}</span>
+      <span class="member-paid">共付 <b>${state.baseCurrency} ${fmt(paid)}</b></span>
+    </div>
+    <div class="member-card-body">
+      ${rows || `<div class="mc-empty">已結清，不須收付款 ✓</div>`}
+    </div>
+  </div>`;
+}
+
+function totalPaidByPerson(idx){
+  return state.expenses
+    .filter(e=>e.payer===idx)
+    .reduce((s,e)=>s+toBase(e.amount,e.currency),0);
+}
+
+function renderDetailTab(){
+  return `
+  <div class="stat-strip">
+    <div class="stat-box">
+      <div class="v">$${fmt(totalSpent())}</div>
+      <div class="l">旅行總花費・含個人消費（${state.baseCurrency}）</div>
+    </div>
+    <div class="stat-box">
+      <div class="v">${state.expenses.length}</div>
+      <div class="l">消費筆數</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>個人消費明細</h2>
+    <p class="section-note">列出每個人自己實際要負擔的每一筆消費（依分攤比例計算），可以看到這趟旅行自己真正花了多少錢——跟「共付」（先幫大家墊了多少）是不同的兩件事。</p>
+    <div class="member-grid">
+      ${state.people.map((p,i)=>renderDetailCard(p,i)).join('')}
+    </div>
+  </div>`;
+}
+
+function renderDetailCard(name, idx){
+  const items = state.expenses.filter(e=>e.participants.includes(idx));
+  const total = items.reduce((s,e)=> s + toBase(e.amount,e.currency)/(e.participants.length||1), 0);
+  const initial = (name||'?').trim().charAt(0) || '?';
+  const rows = items.map(e=>{
+    const share = toBase(e.amount,e.currency)/(e.participants.length||1);
+    const isPayer = e.payer===idx;
+    const isForeign = e.currency !== state.baseCurrency;
+    return `
+    <div class="detail-row">
+      <div class="detail-row-main">
+        <span class="detail-title">${escapeHtml(e.title)}</span>
+        ${isPayer ? `<span class="detail-paid-tag">已付款</span>` : `<span class="detail-payer">${escapeHtml(state.people[e.payer] ?? '—')}先付</span>`}
+      </div>
+      <span class="detail-amt">${state.baseCurrency} ${fmt(share)}${isForeign ? ` <small>(${e.currency} ${fmt(e.amount)})</small>` : ''}</span>
+    </div>`;
+  }).join('');
+  return `
+  <div class="member-card">
+    <div class="member-card-head">
+      <span class="member-avatar">${escapeHtml(initial)}</span>
+      <span class="member-name">${escapeHtml(name)}</span>
+      <button class="detail-copy-btn" data-copy-detail="${idx}" title="複製這個人的消費明細">📋 複製</button>
+    </div>
+    <div class="member-paid-row">個人總開銷 <b>${state.baseCurrency} ${fmt(total)}</b></div>
+    <div class="member-card-body detail-scroll">
+      ${rows || `<div class="mc-empty">目前沒有分攤任何消費</div>`}
+    </div>
+  </div>`;
+}
+
+function personalDetailText(idx){
+  const name = state.people[idx] ?? '（未命名）';
+  const items = state.expenses.filter(e=>e.participants.includes(idx));
+  const total = items.reduce((s,e)=> s + toBase(e.amount,e.currency)/(e.participants.length||1), 0);
+  const lines = [];
+  lines.push(`【${name}】個人消費明細 - ${state.tripTitle}`);
+  lines.push('--------------------------------');
+  if(items.length === 0){
+    lines.push('目前沒有分攤任何消費');
+  }else{
+    items.forEach(e=>{
+      const share = toBase(e.amount,e.currency)/(e.participants.length||1);
+      const tag = e.payer===idx ? '（已付款）' : `（${state.people[e.payer] ?? '—'}先付）`;
+      lines.push(`${e.title}：${state.baseCurrency} ${fmt(share)} ${tag}`);
+    });
+  }
+  lines.push('--------------------------------');
+  lines.push(`個人總開銷：${state.baseCurrency} ${fmt(total)}`);
+  return lines.join('\n');
+}
+
+async function copyPersonalDetail(idx){
+  const text = personalDetailText(idx);
+  try{
+    await navigator.clipboard.writeText(text);
+    flashSaved('已複製到剪貼簿');
+  }catch(e){
+    console.error('複製失敗', e);
+    flashSaved('複製失敗，請手動選取文字');
+  }
+}
+
+function escapeHtml(s){
+  return String(s ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ---------- 事件綁定 ---------- */
+function bindGlobalEvents(){
+  document.querySelectorAll('[data-tab]').forEach(btn=>{
+    btn.onclick = ()=>setTab(btn.dataset.tab);
+  });
+
+  const titleInput = document.getElementById('tripTitleInput');
+  if(titleInput) titleInput.oninput = (e)=>updateTitle(e.target.value);
+
+  const peopleMinus = document.getElementById('peopleMinus');
+  const peoplePlus = document.getElementById('peoplePlus');
+  if(peopleMinus) peopleMinus.onclick = ()=>changePeopleCount(-1);
+  if(peoplePlus) peoplePlus.onclick = ()=>changePeopleCount(1);
+
+  const baseCurSel = document.getElementById('baseCurrencySelect');
+  if(baseCurSel) baseCurSel.onchange = (e)=>updateBaseCurrency(e.target.value);
+
+  const refreshBtn = document.getElementById('refreshBtn');
+  if(refreshBtn) refreshBtn.onclick = refreshFromShared;
+
+  const copyBtn = document.getElementById('copyLinkBtn');
+  if(copyBtn) copyBtn.onclick = copyRoomLink;
+
+  document.querySelectorAll('.person-name-input').forEach(inp=>{
+    inp.oninput = (e)=>updatePersonName(parseInt(inp.dataset.personIdx), e.target.value);
+  });
+
+  document.querySelectorAll('[data-rate-cur]').forEach(inp=>{
+    inp.oninput = (e)=>updateRate(inp.dataset.rateCur, e.target.value);
+  });
+
+  const dTitle = document.getElementById('draftTitle');
+  if(dTitle) dTitle.oninput = (e)=>{ draft.title = e.target.value; refreshAddButton(); };
+
+  const dAmount = document.getElementById('draftAmount');
+  if(dAmount) dAmount.oninput = (e)=>{ draft.amount = e.target.value; updateConversionNote(); refreshAddButton(); };
+
+  const dCurrency = document.getElementById('draftCurrency');
+  if(dCurrency) dCurrency.onchange = (e)=>{ draft.currency = e.target.value; updateConversionNote(); };
+
+  const dPayer = document.getElementById('draftPayer');
+  if(dPayer) dPayer.onchange = (e)=>{ draft.payer = parseInt(e.target.value); };
+
+  const fetchBtn = document.getElementById('fetchRatesBtn');
+  if(fetchBtn) fetchBtn.onclick = fetchLiveRates;
+
+  const convAmountInput = document.getElementById('convAmount');
+  if(convAmountInput) convAmountInput.oninput = (e)=>{ convAmount = e.target.value; updateConverterResult(); };
+
+  const convFromSelect = document.getElementById('convFrom');
+  if(convFromSelect) convFromSelect.onchange = (e)=>{ convFrom = e.target.value; updateConverterResult(); };
+
+  const convToSelect = document.getElementById('convTo');
+  if(convToSelect) convToSelect.onchange = (e)=>{ convTo = e.target.value; updateConverterResult(); };
+
+  const convSwapBtn = document.getElementById('convSwapBtn');
+  if(convSwapBtn) convSwapBtn.onclick = ()=>{
+    const t = convFrom; convFrom = convTo; convTo = t;
+    if(convFromSelect) convFromSelect.value = convFrom;
+    if(convToSelect) convToSelect.value = convTo;
+    updateConverterResult();
+  };
+
+  const deleteRoomBtn = document.getElementById('deleteRoomBtn');
+  if(deleteRoomBtn) deleteRoomBtn.onclick = deleteRoomForever;
+
+  const copyOwnerBtn = document.getElementById('copyOwnerLinkBtn');
+  if(copyOwnerBtn) copyOwnerBtn.onclick = ()=>copyOwnerLink(copyOwnerBtn, '複製我的管理連結');
+
+  const reminderCopyBtn = document.getElementById('reminderCopyBtn');
+  if(reminderCopyBtn) reminderCopyBtn.onclick = async ()=>{
+    try{
+      await navigator.clipboard.writeText(ownerRoomUrl(roomId, state.ownerToken));
+      flashSaved('已複製管理連結');
+      dismissOwnerReminder();
+    }catch(e){
+      flashSaved('複製失敗，請手動複製網址列連結');
+    }
+  };
+
+  const reminderDismissBtn = document.getElementById('reminderDismissBtn');
+  if(reminderDismissBtn) reminderDismissBtn.onclick = dismissOwnerReminder;
+
+  const exportBtn = document.getElementById('exportCsvBtn');
+  if(exportBtn) exportBtn.onclick = exportToCsv;
+
+  document.querySelectorAll('[data-copy-detail]').forEach(btn=>{
+    btn.onclick = ()=>copyPersonalDetail(parseInt(btn.dataset.copyDetail));
+  });
+
+  document.querySelectorAll('[data-toggle-participant]').forEach(chip=>{
+    chip.onclick = ()=>toggleParticipant(parseInt(chip.dataset.toggleParticipant));
+  });
+
+  const selAll = document.getElementById('selectAllBtn');
+  const selNone = document.getElementById('selectNoneBtn');
+  if(selAll) selAll.onclick = ()=>selectAllParticipants(true);
+  if(selNone) selNone.onclick = ()=>selectAllParticipants(false);
+
+  const addBtn = document.getElementById('addExpenseBtn');
+  if(addBtn) addBtn.onclick = addExpense;
+
+  const cancelBtn = document.getElementById('cancelEditBtn');
+  if(cancelBtn) cancelBtn.onclick = cancelEdit;
+
+  document.querySelectorAll('[data-edit-expense]').forEach(btn=>{
+    btn.onclick = ()=>startEditExpense(parseFloat(btn.dataset.editExpense));
+  });
+
+  document.querySelectorAll('[data-delete-expense]').forEach(btn=>{
+    btn.onclick = ()=>deleteExpense(parseFloat(btn.dataset.deleteExpense));
+  });
+}
+
+function updateConversionNote(){
+  const note = document.getElementById('conversionNote');
+  if(!note) return;
+  const otherCurrency = draft.currency !== state.baseCurrency;
+  if(otherCurrency && draft.amount){
+    note.style.marginTop = '8px';
+    note.textContent = `≈ ${fmt(toBase(parseFloat(draft.amount)||0, draft.currency))} ${state.baseCurrency}（依目前匯率換算）`;
+  }else{
+    note.style.marginTop = '0';
+    note.textContent = '';
+  }
+}
+
+function updateConverterResult(){
+  const el = document.getElementById('convResult');
+  if(!el) return;
+  if(convAmount){
+    el.innerHTML = `${escapeHtml(convAmount)} ${convFrom} ≈ <b>${fmt(convertAmount(parseFloat(convAmount)||0, convFrom, convTo))} ${convTo}</b>`;
+  }else{
+    el.textContent = '輸入金額看換算結果';
+  }
+}
+
+function refreshAddButton(){
+  const btn = document.getElementById('addExpenseBtn');
+  if(btn) btn.disabled = !(draft.title.trim() && draft.amount && draft.participants.length>0);
+}
+
+async function copyRoomLink(){
+  const url = roomUrl(roomId);
+  try{
+    await navigator.clipboard.writeText(url);
+    flashSaved('連結已複製，傳給同行的人吧！');
+  }catch(e){
+    flashSaved('複製失敗，請手動複製網址列連結');
+  }
+}
+
+initApp();
+</script>
+</body>
+</html>
