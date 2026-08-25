@@ -3,11 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
 <title>旅行分帳票根</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans+TC:wght@400;500;600;700&display=swap');
 
 :root{
+  color-scheme: light dark;
   --ink:#1E2A35;
   --ink-soft:#4A5A66;
   --paper:#F7F2E6;
@@ -19,6 +21,37 @@
   --line:#D8CDB0;
   --white:#FFFDF8;
   --radius:2px;
+  /* 專門給「深色票根卡塊」用的顏色（票根標題列、統計方塊、存檔提示等）：
+     淺色模式下跟 --ink / --paper 的值一樣，深色模式會另外調整成霧感深藍灰，
+     讓這些卡塊在任何模式下都維持「深底淺字」的固定樣子，不受頁面深淺影響 */
+  --block-bg:#1E2A35;
+  --block-text:#F7F2E6;
+  --warn-bg:#FFF6E5;
+  --warn-text:#7a5a12;
+  --ok-bg:#E9F5F0;
+  --err-bg:#FBEAE5;
+}
+
+@media (prefers-color-scheme: dark){
+  :root{
+    /* 莫蘭迪風格：低飽和、霧霧的暖灰色調，不用高對比的純黑純白 */
+    --ink:#D9D2C4;
+    --ink-soft:#A69E8E;
+    --paper:#2A2723;
+    --paper-2:#332F29;
+    --teal:#5C6B7A;
+    --teal-deep:#434F5C;
+    --gold:#C7A876;
+    --coral:#BC7A64;
+    --line:#454038;
+    --white:#332F29;
+    --block-bg:#3D4148;
+    --block-text:#E8E2D4;
+    --warn-bg:#463E2E;
+    --warn-text:#D9C79A;
+    --ok-bg:#38443E;
+    --err-bg:#463934;
+  }
 }
 
 *{box-sizing:border-box;}
@@ -37,8 +70,8 @@ body{
 
 /* ===== Header: boarding-pass strip ===== */
 .boardingpass{
-  background:var(--ink);
-  color:var(--paper);
+  background:var(--block-bg);
+  color:var(--block-text);
   border-radius:10px;
   position:relative;
   overflow:hidden;
@@ -67,7 +100,7 @@ body{
   font-family:'Fraunces',serif;
   font-weight:600;
   font-size:26px;
-  color:var(--paper);
+  color:var(--block-text);
   padding:2px 0 6px;
   width:100%;
   outline:none;
@@ -118,7 +151,7 @@ body{
 }
 .bp-people-edit button{
   width:22px;height:22px;border-radius:50%;border:1px solid rgba(247,242,230,0.4);
-  background:transparent;color:var(--paper);cursor:pointer;font-size:14px;line-height:1;
+  background:transparent;color:var(--block-text);cursor:pointer;font-size:14px;line-height:1;
 }
 .bp-people-edit button:hover{background:rgba(247,242,230,0.15);}
 .bp-currency-select{
@@ -134,7 +167,7 @@ body{
 .bp-refresh-btn{
   background:rgba(247,242,230,0.1);
   border:1px solid rgba(247,242,230,0.3);
-  color:var(--paper);
+  color:var(--block-text);
   font-family:'IBM Plex Mono',monospace;
   font-size:11.5px;
   padding:4px 10px;
@@ -154,7 +187,7 @@ body{
 }
 .room-badge b{color:var(--gold);letter-spacing:0.02em;}
 .room-copy-btn{
-  background:var(--gold);color:var(--ink);border:none;border-radius:4px;
+  background:var(--gold);color:var(--block-bg);border:none;border-radius:4px;
   font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;
   padding:5px 10px;cursor:pointer;
 }
@@ -179,12 +212,13 @@ body{
 .setup-card h2{font-family:'Fraunces',serif;font-size:17px;margin:0 0 8px;}
 .created-card{border-color:var(--gold);}
 .created-warning{
-  background:#FFF6E5;border:1px solid var(--gold);border-radius:5px;
-  padding:10px 12px;color:#7a5a12;font-weight:500;line-height:1.7;
+  background:var(--warn-bg);border:1px solid var(--gold);border-radius:5px;
+  padding:10px 12px;color:var(--warn-text);font-weight:500;line-height:1.7;
 }
 #createdRoomLink{
-  font-family:'IBM Plex Mono',monospace;font-size:12.5px;
-  color:var(--teal-deep);background:var(--paper-2);cursor:text;
+  font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:600;
+  color:var(--gold);-webkit-text-fill-color:var(--gold);opacity:1;
+  background:var(--paper-2);cursor:text;
 }
 .create-room-hint{
   background:var(--paper-2);border-left:3px solid var(--gold);
@@ -315,8 +349,8 @@ input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--
   margin-top:12px;padding:8px 10px;border-radius:5px;
   font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:center;
 }
-.custom-share-sum.sum-ok{background:#E9F5F0;color:var(--teal-deep);}
-.custom-share-sum.sum-warn{background:#FBEAE5;color:var(--coral);}
+.custom-share-sum.sum-ok{background:var(--ok-bg);color:var(--teal-deep);}
+.custom-share-sum.sum-warn{background:var(--err-bg);color:var(--coral);}
 .link-btn{
   background:none;border:none;color:var(--teal-deep);font-size:11.5px;
   text-decoration:underline;cursor:pointer;padding:0;font-family:'IBM Plex Mono',monospace;
@@ -359,12 +393,32 @@ input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--
 .ticket-meta{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);margin-top:5px;line-height:1.7;}
 .ticket-actions{display:flex;gap:2px;flex-shrink:0;}
 .ticket-icon-btn{
-  background:none;border:none;color:#A79B79;
+  background:none;border:none;color:var(--ink-soft);
   font-size:14px;cursor:pointer;line-height:1;padding:4px 6px;border-radius:4px;
 }
 .ticket-icon-btn:hover{background:var(--paper-2);color:var(--teal-deep);}
 .ticket-icon-del:hover{color:var(--coral);}
 .ticket-fx{color:var(--gold);}
+.ticket-day-badge{
+  display:inline-block;
+  background:var(--paper-2);color:var(--ink-soft);
+  font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;
+  padding:1px 7px;border-radius:10px;vertical-align:middle;margin-left:2px;
+}
+.day-tabs{
+  display:flex;gap:6px;overflow-x:auto;margin:10px 0 14px;padding-bottom:2px;
+  scrollbar-width:none; /* Firefox：隱藏捲軸但保留滑動效果 */
+  -ms-overflow-style:none; /* 舊版 Edge/IE */
+}
+.day-tabs::-webkit-scrollbar{display:none;} /* Chrome / Safari */
+.day-tab-btn{
+  flex-shrink:0;
+  padding:6px 12px;border-radius:16px;
+  background:var(--paper);border:1px solid var(--line);color:var(--ink-soft);
+  font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;cursor:pointer;
+  white-space:nowrap;
+}
+.day-tab-btn.active{background:var(--teal);border-color:var(--teal-deep);color:var(--white);}
 
 .empty-state{
   text-align:center;padding:34px 12px;color:var(--ink-soft);
@@ -388,7 +442,7 @@ input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--
 /* ===== Settlement ===== */
 .stat-strip{display:flex;gap:10px;margin-bottom:16px;}
 .stat-box{
-  flex:1;background:var(--ink);color:var(--paper);border-radius:8px;padding:14px 16px;
+  flex:1;background:var(--block-bg);color:var(--block-text);border-radius:8px;padding:14px 16px;
 }
 .stat-box .v{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:var(--gold);}
 .stat-box .l{font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,242,230,0.65);margin-top:3px;}
@@ -421,15 +475,23 @@ input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--
 @media (min-width:540px){
   .member-grid{grid-template-columns:1fr 1fr;}
 }
+.member-list-collapsed{display:flex;flex-direction:column;gap:10px;}
 .member-card-head{
   display:flex;align-items:center;gap:10px;
-  background:var(--ink);
-  color:var(--paper);
+  background:var(--block-bg);
+  color:var(--block-text);
   padding:11px 14px;
 }
+.member-card-head-btn{
+  width:100%;border:none;text-align:left;cursor:pointer;
+  font-family:inherit;font-size:inherit;margin:0;outline:none;
+  -webkit-appearance:none;appearance:none;
+}
+.member-card-head-btn:hover{background:#2a3946;}
+.member-collapse-arrow{font-size:10px;color:var(--gold);flex-shrink:0;}
 .member-avatar{
   width:28px;height:28px;border-radius:50%;
-  background:var(--gold);color:var(--ink);
+  background:var(--gold);color:var(--block-bg);
   display:flex;align-items:center;justify-content:center;
   font-family:'Fraunces',serif;font-weight:700;font-size:14px;
   flex-shrink:0;
@@ -445,13 +507,20 @@ input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--
 }
 .member-paid-row b{color:var(--teal-deep);}
 .detail-copy-btn{
-  background:rgba(247,242,230,0.12);
-  border:1px solid rgba(247,242,230,0.3);
-  color:var(--paper);
-  font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;
-  padding:4px 9px;border-radius:4px;cursor:pointer;flex-shrink:0;white-space:nowrap;
+  display:block;width:100%;text-align:center;
+  background:var(--teal);
+  border:1px solid var(--teal-deep);
+  color:var(--white);
+  font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:700;
+  padding:10px 12px;cursor:pointer;
 }
-.detail-copy-btn:hover{background:rgba(247,242,230,0.22);}
+.detail-copy-btn:hover{background:var(--teal-deep);}
+.card-header-copy-btn{
+  margin-left:auto;flex-shrink:0;
+  background:none;border:none;color:var(--teal-deep);
+  font-size:17px;line-height:1;padding:4px;cursor:pointer;
+}
+.card-header-copy-btn:hover{color:var(--teal);}
 .detail-scroll{
   max-height:220px;
   overflow-y:auto;
@@ -517,13 +586,43 @@ input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--
 .btn-secondary:hover{background:var(--paper-2);}
 .btn-secondary:disabled{opacity:0.6;cursor:wait;}
 
+.btn-gold{
+  margin-top:14px;
+  padding:10px 16px;
+  background:var(--gold);
+  color:var(--block-bg);
+  border:1px solid var(--gold);
+  border-radius:6px;
+  font-family:'IBM Plex Mono',monospace;
+  font-weight:700;
+  font-size:12.5px;
+  cursor:pointer;
+}
+.btn-gold:hover{background:#d9ac4a;}
+.btn-gold:disabled{opacity:0.6;cursor:wait;}
+
+.btn-rose{
+  margin-top:6px;
+  padding:11px 16px;
+  background:var(--white);
+  color:var(--coral);
+  border:1px solid var(--coral);
+  border-radius:6px;
+  font-family:'IBM Plex Mono',monospace;
+  font-weight:600;
+  font-size:13px;
+  cursor:pointer;
+}
+.btn-rose:hover{background:var(--coral);color:var(--white);}
+.btn-rose:disabled{opacity:0.6;cursor:wait;}
+
 .rate-updated{
   font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);
   margin-top:8px;
 }
 .rate-error{
   font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--coral);
-  margin-top:8px;background:#FBEAE5;border:1px solid var(--coral);border-radius:5px;padding:8px 10px;
+  margin-top:8px;background:var(--err-bg);border:1px solid var(--coral);border-radius:5px;padding:8px 10px;
 }
 
 .rates-grid{display:flex;flex-direction:column;gap:9px;margin-top:12px;}
@@ -548,7 +647,7 @@ input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--
 .conv-swap-btn:hover{background:var(--paper-2);}
 .conv-result{
   margin-top:14px;padding:14px;
-  background:var(--ink);color:var(--paper);
+  background:var(--block-bg);color:var(--block-text);
   border-radius:6px;text-align:center;
   font-family:'IBM Plex Mono',monospace;font-size:14px;
 }
@@ -564,7 +663,7 @@ input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--
 }
 .savebadge{
   position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(80px);
-  background:var(--ink);color:var(--gold);font-family:'IBM Plex Mono',monospace;
+  background:var(--block-bg);color:var(--gold);font-family:'IBM Plex Mono',monospace;
   font-size:11.5px;padding:8px 16px;border-radius:20px;
   transition:transform .25s ease;box-shadow:0 6px 18px rgba(0,0,0,0.25);
   pointer-events:none;
@@ -602,6 +701,7 @@ function defaultState(){
     tripTitle:'我的旅行分帳',
     baseCurrency:'TWD',
     people:['我','夥伴2','夥伴3','夥伴4'],
+    days: 1,
     rates:{...DEFAULT_RATES},
     expenses:[]
   };
@@ -719,6 +819,8 @@ async function sweepStaleRooms(){
   }
 }
 
+const TRIP_END_DELETE_DAYS = 5; // 標記「結束旅程」後，超過幾天沒人取消就自動清除
+
 async function enterRoom(){
   appPhase = 'loading';
   render();
@@ -732,6 +834,27 @@ async function enterRoom(){
       }
     }
     state = record || defaultState();
+    if(!state.days) state.days = 1; // 相容這個功能上線前建立的舊房間
+
+    // 如果這個房間先前被標記「結束旅程」，先判斷要不要直接自動清除
+    if(state.tripEndedAt){
+      const elapsedMs = Date.now() - state.tripEndedAt;
+      if(elapsedMs >= TRIP_END_DELETE_DAYS * 24 * 60 * 60 * 1000){
+        await firebaseDelete(roomId);
+        roomId = null;
+        state = null;
+        appPhase = 'setup';
+        setupError = `這個房間先前已經標記「結束旅程」，超過 ${TRIP_END_DELETE_DAYS} 天沒有人取消，已經依照設定自動清除了。`;
+        history.replaceState(null, '', location.pathname);
+        render();
+        return;
+      }
+      // 還在保留期內，先跳出確認畫面，不直接進房間
+      appPhase = 'ended';
+      render();
+      return;
+    }
+
     // 進房間也算一次活動，順便更新/補上活動時間戳記
     await firebaseSet(roomId, { ...state, lastActiveAt: Date.now() });
     appPhase = 'app';
@@ -839,6 +962,9 @@ let rateFetchError = null;
 let editingId = null;
 let convAmount = '1';
 let convFrom = null;
+let expenseDayFilter = 'all'; // 記一筆分頁的消費紀錄，目前選的是哪一天（或 'all' 全部）
+let detailDayFilter = 'all'; // 個人明細分頁，目前選的是哪一天
+let expandedMembers = {}; // 個人明細卡片，哪些人目前是展開狀態
 let convTo = null;
 let roomCreatedAutoCopied = false;
 let createdRoomBusy = false;
@@ -852,7 +978,9 @@ function resetDraft(){
     payer:0,
     participants: state.people.map((_,i)=>i),
     splitMode: 'equal',
-    customShares: {}
+    customShares: {},
+    customSharesTouched: {},
+    day: 1
   };
 }
 
@@ -982,18 +1110,23 @@ function exportToCsv(){
   lines.push(csvRow([state.tripTitle]));
   lines.push(csvRow(['基準幣別', state.baseCurrency]));
   lines.push(csvRow(['出遊人數', state.people.length]));
+  lines.push(csvRow(['出遊天數', state.days || 1]));
   lines.push(csvRow(['成員', state.people.join('、')]));
+  lines.push(csvRow(['全員均攤總花費', fmt(totalSpentSharedByAll())]));
+  lines.push(csvRow(['旅行總花費（含個人消費）', fmt(totalSpent())]));
   lines.push('');
 
   lines.push(csvRow(['—— 消費紀錄 ——']));
-  lines.push(csvRow(['名目','金額','幣別',`換算後金額(${state.baseCurrency})`,'付款人','分攤方式','分攤人數','分攤明細']));
-  state.expenses.forEach(e=>{
+  lines.push(csvRow(['天數','名目','金額','幣別',`換算後金額(${state.baseCurrency})`,'付款人','分攤方式','分攤人數','分攤明細']));
+  // 匯出時照天數排序，方便對照旅程順序
+  [...state.expenses].sort((a,b)=>(a.day||1)-(b.day||1)).forEach(e=>{
     const shares = getExpenseShares(e);
     const isCustom = e.splitMode === 'custom' && e.customShares;
     const breakdown = e.participants
       .map(i=>`${state.people[i] ?? '—'}:${fmt(shares[i]||0)}`)
       .join('、');
     lines.push(csvRow([
+      `第${e.day||1}天`,
       e.title,
       e.amount,
       e.currency,
@@ -1013,6 +1146,13 @@ function exportToCsv(){
     const b = balances[i];
     const label = b>0.5 ? '可收回' : (b<-0.5 ? '需支付' : '已結清');
     lines.push(csvRow([p, fmt(b), label]));
+  });
+  lines.push('');
+
+  lines.push(csvRow([`—— 每人共付 (${state.baseCurrency}) ——`]));
+  lines.push(csvRow(['成員','共付總額']));
+  state.people.forEach((p,i)=>{
+    lines.push(csvRow([p, fmt(totalPaidByPerson(i))]));
   });
   lines.push('');
 
@@ -1071,6 +1211,22 @@ function changePeopleCount(delta){
   saveState(); render();
 }
 
+function changeDaysCount(delta){
+  const n = (state.days || 1) + delta;
+  if(n < 1 || n > 60) return;
+  state.days = n;
+  if(delta < 0){
+    // 天數變少時，超出範圍的舊消費紀錄跟表單草稿都要拉回最後一天，不要留著失效的天數
+    state.expenses.forEach(e=>{
+      if((e.day || 1) > state.days) e.day = state.days;
+    });
+    if((draft.day || 1) > state.days) draft.day = state.days;
+    if(expenseDayFilter !== 'all' && expenseDayFilter > state.days) expenseDayFilter = 'all';
+    if(detailDayFilter !== 'all' && detailDayFilter > state.days) detailDayFilter = 'all';
+  }
+  saveState(); render();
+}
+
 function updatePersonName(idx, val){
   state.people[idx] = val || ('夥伴'+(idx+1));
   saveState();
@@ -1079,6 +1235,56 @@ function updatePersonName(idx, val){
 function updateBaseCurrency(val){
   state.baseCurrency = val;
   saveState(); render();
+}
+
+/* ---------- 結束旅程 ---------- */
+function daysLeftUntilAutoDelete(){
+  if(!state.tripEndedAt) return null;
+  const elapsedDays = (Date.now() - state.tripEndedAt) / (24*60*60*1000);
+  return Math.max(0, Math.ceil(TRIP_END_DELETE_DAYS - elapsedDays));
+}
+
+function endTrip(){
+  const ok = confirm(`確定要結束這趟旅程嗎？\n\n結束後，這個房間會在 ${TRIP_END_DELETE_DAYS} 天後自動清除。這幾天內隨時可以回來取消、繼續使用，不會馬上就刪掉。`);
+  if(!ok) return;
+  state.tripEndedAt = Date.now();
+  // 額外存一個人看得懂的文字欄位，方便直接在 Firebase 主控台的資料列表上
+  // 一眼看出「這個房間已經結束」，不用自己去換算時間戳記
+  state.tripEndedLabel = `⚠ 已結束旅程・${new Date().toLocaleString('zh-Hant-TW', {hour12:false})}・${TRIP_END_DELETE_DAYS}天後自動清除`;
+  saveState();
+  render();
+}
+
+function cancelEndTrip(){
+  delete state.tripEndedAt;
+  delete state.tripEndedLabel;
+  saveState();
+  render();
+}
+
+async function continueEndedRoom(){
+  try{
+    delete state.tripEndedAt;
+    delete state.tripEndedLabel;
+    await firebaseSet(roomId, { ...state, lastActiveAt: Date.now() });
+    appPhase = 'app';
+    history.replaceState(null, '', roomUrl(roomId));
+  }catch(e){
+    console.error('恢復房間失敗', e);
+    setupError = describeNetworkError(e);
+    appPhase = 'setup';
+    roomId = null;
+    state = null;
+  }
+  render();
+}
+
+function goCreateNewFromEnded(){
+  roomId = null;
+  state = null;
+  appPhase = 'setup';
+  history.replaceState(null, '', location.pathname);
+  render();
 }
 
 function updateRate(cur, val){
@@ -1097,12 +1303,14 @@ function toggleParticipant(idx){
   if(pos >= 0){
     draft.participants.splice(pos,1);
     delete draft.customShares[idx];
+    delete draft.customSharesTouched[idx];
   }else{
     draft.participants.push(idx);
     if(draft.splitMode === 'custom' && draft.customShares[idx] === undefined){
       draft.customShares[idx] = '';
     }
   }
+  if(draft.splitMode === 'custom') autoFillRemainingShares();
   renderAddTabOnly();
 }
 
@@ -1115,7 +1323,9 @@ function selectAllParticipants(all){
       });
     }else{
       draft.customShares = {};
+      draft.customSharesTouched = {};
     }
+    autoFillRemainingShares();
   }
   renderAddTabOnly();
 }
@@ -1128,6 +1338,23 @@ function setSplitMode(mode){
     });
   }
   renderAddTabOnly();
+}
+
+// 自動把還沒被手動改過的欄位，平均補上「總額扣掉已手動填的部分」剩下的錢
+function autoFillRemainingShares(){
+  const total = parseFloat(draft.amount) || 0;
+  const touched = draft.participants.filter(idx => draft.customSharesTouched[idx]);
+  const untouched = draft.participants.filter(idx => !draft.customSharesTouched[idx]);
+  if(untouched.length === 0) return; // 全部都手動填過了，不用自動補
+  const touchedSum = touched.reduce((s,idx)=> s + (parseFloat(draft.customShares[idx]) || 0), 0);
+  const remaining = total - touchedSum;
+  const each = remaining / untouched.length;
+  untouched.forEach(idx=>{
+    draft.customShares[idx] = each !== 0 ? String(Math.round(each * 100) / 100) : '';
+    // 直接改輸入框的值，不整個重繪，避免打斷正在輸入中的欄位
+    const input = document.querySelector(`[data-custom-share="${idx}"]`);
+    if(input) input.value = draft.customShares[idx];
+  });
 }
 
 function updateCustomShareSum(){
@@ -1161,7 +1388,8 @@ function addExpense(){
         currency: draft.currency,
         payer: draft.payer,
         participants: [...draft.participants],
-        splitMode: draft.splitMode
+        splitMode: draft.splitMode,
+        day: draft.day || 1
       };
       if(isCustom) updated.customShares = customShares; else delete updated.customShares;
       state.expenses[idx] = updated;
@@ -1175,7 +1403,8 @@ function addExpense(){
       currency: draft.currency,
       payer: draft.payer,
       participants: [...draft.participants],
-      splitMode: draft.splitMode
+      splitMode: draft.splitMode,
+      day: draft.day || 1
     };
     if(isCustom) newExpense.customShares = customShares;
     state.expenses.unshift(newExpense);
@@ -1199,7 +1428,12 @@ function startEditExpense(id){
     splitMode: isCustom ? 'custom' : 'equal',
     customShares: isCustom
       ? Object.fromEntries(e.participants.map(idx=>[idx, String(e.customShares[idx] ?? '')]))
-      : {}
+      : {},
+    // 讀進來的自訂金額都當作「使用者已經確認過的值」，不要被自動補齊邏輯覆蓋掉
+    customSharesTouched: isCustom
+      ? Object.fromEntries(e.participants.map(idx=>[idx, true]))
+      : {},
+    day: e.day || 1
   };
   activeTab = 'add';
   render();
@@ -1303,6 +1537,11 @@ function render(){
     bindRoomCreatedEvents();
     return;
   }
+  if(appPhase === 'ended'){
+    app.innerHTML = renderRoomEndedScreen();
+    bindRoomEndedEvents();
+    return;
+  }
 
   app.innerHTML = `
     ${renderHeader()}
@@ -1340,7 +1579,7 @@ function renderSetupScreen(){
       <p class="section-note">如果朋友已經傳給你連結，直接點連結就好；如果只有拿到「房間代碼」，貼在這裡加入。</p>
       <label>房間連結或房間代碼</label>
       <input type="text" id="joinCodeInput" placeholder="貼上連結或房間代碼" value="${escapeHtml(joinCodeDraft)}">
-      <button class="btn-secondary" id="joinRoomBtn" style="width:100%;text-align:center;margin-top:10px;" ${setupBusy?'disabled':''}>加入房間</button>
+      <button class="btn-gold" id="joinRoomBtn" style="width:100%;text-align:center;margin-top:10px;" ${setupBusy?'disabled':''}>加入房間</button>
     </div>
 
     ${setupError ? `<div class="rate-error">${escapeHtml(setupError)}</div>` : ''}
@@ -1372,7 +1611,7 @@ function renderRoomCreatedScreen(){
       ${roomCreatedAutoCopied ? `<div class="rate-updated" style="text-align:center;margin-bottom:10px;">✓ 已經自動幫你複製到剪貼簿了，保險起見也可以再按一次下面按鈕</div>` : ''}
       <label>房間連結</label>
       <input type="text" id="createdRoomLink" readonly value="${escapeHtml(url)}" onclick="this.select()">
-      <button class="btn-secondary" id="copyCreatedLinkBtn" style="width:100%;text-align:center;margin-top:10px;">複製連結</button>
+      <button class="btn-gold" id="copyCreatedLinkBtn" style="width:100%;text-align:center;margin-top:10px;">複製連結</button>
       <button class="btn-primary" id="enterRoomBtn" style="margin-top:16px;" ${createdRoomBusy?'disabled':''}>${createdRoomBusy ? '建立中…' : '✓ 我已經複製好了，正式建立並進入房間'}</button>
       ${createdRoomError ? `<div class="rate-error">${escapeHtml(createdRoomError)}</div>` : ''}
     </div>
@@ -1394,6 +1633,28 @@ function bindRoomCreatedEvents(){
 
   const enterBtn = document.getElementById('enterRoomBtn');
   if(enterBtn) enterBtn.onclick = enterCreatedRoom;
+}
+
+function renderRoomEndedScreen(){
+  const daysLeft = daysLeftUntilAutoDelete();
+  return `
+  <div class="setup-screen">
+    <p class="setup-eyebrow">Trip Ledger · 旅行分帳票根</p>
+    <div class="setup-card created-card">
+      <h2>🏁 這個房間已經標記為「旅程結束」</h2>
+      <p class="section-note created-warning">這個房間先前已經被標記結束旅程，${daysLeft <= 0 ? '隨時可能被系統自動清除' : `大約還有 ${daysLeft} 天會被系統自動清除`}。你可以選擇繼續使用這個房間（會取消結束狀態），或是直接開一個全新的房間。</p>
+      <button class="btn-primary" id="continueEndedBtn">✓ 繼續使用這個房間</button>
+      <button class="btn-secondary" id="newRoomFromEndedBtn" style="width:100%;text-align:center;margin-top:10px;">✈ 建立新房間</button>
+    </div>
+  </div>`;
+}
+
+function bindRoomEndedEvents(){
+  const continueBtn = document.getElementById('continueEndedBtn');
+  if(continueBtn) continueBtn.onclick = continueEndedRoom;
+
+  const newRoomBtn = document.getElementById('newRoomFromEndedBtn');
+  if(newRoomBtn) newRoomBtn.onclick = goCreateNewFromEnded;
 }
 
 function renderAddTabOnly(){
@@ -1424,8 +1685,14 @@ function renderHeader(){
       <div class="bp-people-edit">
         <span>出遊人數</span>
         <button id="peopleMinus">−</button>
-        <strong style="color:var(--paper);font-size:14px;">${state.people.length}</strong>
+        <strong style="color:var(--block-text);font-size:14px;">${state.people.length}</strong>
         <button id="peoplePlus">＋</button>
+      </div>
+      <div class="bp-people-edit">
+        <span>天數</span>
+        <button id="daysMinus">−</button>
+        <strong style="color:var(--block-text);font-size:14px;">${state.days || 1}</strong>
+        <button id="daysPlus">＋</button>
       </div>
       <select class="bp-currency-select" id="baseCurrencySelect">
         ${CURRENCIES.map(c=>`<option value="${c}" ${c===state.baseCurrency?'selected':''}>基準幣別 ${c}</option>`).join('')}
@@ -1514,6 +1781,16 @@ function renderPeopleTab(){
         </div>
       `).join('')}
     </div>
+  </div>
+  <div class="card">
+    <h2>🏁 旅程狀態</h2>
+    ${state.tripEndedAt ? `
+    <p class="section-note">這個房間已經標記為「已結束」，大約還有 ${daysLeftUntilAutoDelete()} 天會被系統自動清除。</p>
+    <button class="btn-secondary" id="cancelEndTripBtn" style="width:100%;text-align:center;">取消結束，繼續使用</button>
+    ` : `
+    <p class="section-note">旅行結束了嗎？按下面的按鈕標記這趟旅程已經結束，房間會在 ${TRIP_END_DELETE_DAYS} 天後自動清除，這幾天內都可以隨時回來取消。（這跟原本「連續90天沒人用才清除」的機制是分開的兩件事，這個是你主動告訴系統旅程結束了。）</p>
+    <button class="btn-rose" id="endTripBtn" style="width:100%;text-align:center;">🏁 結束旅程</button>
+    `}
   </div>`;
 }
 
@@ -1545,6 +1822,13 @@ function renderAddTab(){
     <select id="draftPayer">
       ${state.people.map((p,i)=>`<option value="${i}" ${draft.payer===i?'selected':''}>${escapeHtml(p)}</option>`).join('')}
     </select>
+
+    ${(state.days || 1) > 1 ? `
+    <label>是第幾天的消費</label>
+    <select id="draftDay">
+      ${Array.from({length: state.days || 1}, (_,i)=>i+1).map(d=>`<option value="${d}" ${draft.day===d?'selected':''}>第 ${d} 天</option>`).join('')}
+    </select>
+    ` : ''}
 
     <label>這筆要由誰分攤（${draft.participants.length} 人${draft.splitMode==='custom'?'自訂比例':'平均'}分攤）</label>
     <div class="chip-group">
@@ -1580,10 +1864,29 @@ function renderAddTab(){
 
   <div class="card">
     <h2>消費紀錄（${state.expenses.length}）</h2>
+    ${(state.days || 1) > 1 ? renderDayTabs(expenseDayFilter, 'expense-day-tab') : ''}
     <div class="ticket-list">
-      ${state.expenses.length===0 ? `<div class="empty-state">還沒有任何消費紀錄<br>從上面加入第一筆吧 ✈</div>` : state.expenses.map(e=>renderTicket(e, isEditing && e.id===editingId)).join('')}
+      ${renderExpenseListFiltered(isEditing)}
     </div>
   </div>`;
+}
+
+function renderDayTabs(activeDay, dataAttr){
+  const days = state.days || 1;
+  const tabs = ['all', ...Array.from({length: days}, (_,i)=>i+1)];
+  return `<div class="day-tabs">
+    ${tabs.map(d=>`<button class="day-tab-btn ${activeDay===d?'active':''}" data-${dataAttr}="${d}">${d==='all'?'全部':'第'+d+'天'}</button>`).join('')}
+  </div>`;
+}
+
+function renderExpenseListFiltered(isEditing){
+  const filtered = expenseDayFilter === 'all'
+    ? state.expenses
+    : state.expenses.filter(e => (e.day || 1) === expenseDayFilter);
+  if(filtered.length === 0){
+    return `<div class="empty-state">${state.expenses.length===0 ? '還沒有任何消費紀錄<br>從上面加入第一筆吧 ✈' : '這一天還沒有消費紀錄'}</div>`;
+  }
+  return filtered.map(e=>renderTicket(e, isEditing && e.id===editingId)).join('');
 }
 
 function renderTicket(e, isBeingEdited){
@@ -1600,7 +1903,7 @@ function renderTicket(e, isBeingEdited){
   return `
   <div class="ticket ${isBeingEdited ? 'ticket-editing' : ''}">
     <div class="ticket-top">
-      <span class="ticket-title">${escapeHtml(e.title)}</span>
+      <span class="ticket-title">${escapeHtml(e.title)}${(state.days||1)>1 ? ` <span class="ticket-day-badge">第${e.day||1}天</span>` : ''}</span>
       <div class="ticket-actions">
         <button class="ticket-icon-btn" data-edit-expense="${e.id}" title="修改">✎</button>
         <button class="ticket-icon-btn ticket-icon-del" data-delete-expense="${e.id}" title="刪除">✕</button>
@@ -1655,7 +1958,7 @@ function renderSettleTab(){
   </div>
 
   <div class="card">
-    <h2>每人結算卡</h2>
+    <h2>每人結算卡 <button class="card-header-copy-btn" id="copyAllSettlementBtn" title="複製全部人的結算內容">📋</button></h2>
     <p class="section-note">這裡列出每個人跟「其他每一個人」之間實際的淨欠款，是依照大家實際一起分攤過的消費直接計算、互相抵銷後的結果——不是繞道由某個人代收代付的簡化版本，所以像夥伴4只要有跟夥伴2一起分攤過消費，兩人之間該收付的金額就會直接顯示在雙方卡片上。</p>
     <div class="member-grid">
       ${state.people.map((p,i)=>renderMemberCard(p,i,net)).join('')}
@@ -1723,17 +2026,21 @@ function renderDetailTab(){
 
   <div class="card">
     <h2>個人消費明細</h2>
-    <p class="section-note">列出每個人自己實際要負擔的每一筆消費（依分攤比例計算），可以看到這趟旅行自己真正花了多少錢——跟「共付」（先幫大家墊了多少）是不同的兩件事。</p>
-    <div class="member-grid">
+    <p class="section-note">點成員名字可以展開/收合明細。列出每個人自己實際要負擔的每一筆消費（依分攤比例計算）——跟「共付」（先幫大家墊了多少）是不同的兩件事。</p>
+    ${(state.days || 1) > 1 ? renderDayTabs(detailDayFilter, 'detail-day-tab') : ''}
+    <div class="member-list-collapsed">
       ${state.people.map((p,i)=>renderDetailCard(p,i)).join('')}
     </div>
   </div>`;
 }
 
 function renderDetailCard(name, idx){
-  const items = state.expenses.filter(e=>e.participants.includes(idx));
-  const total = items.reduce((s,e)=> s + (getExpenseShares(e)[idx] || 0), 0);
+  const allItems = state.expenses.filter(e=>e.participants.includes(idx));
+  const items = detailDayFilter === 'all' ? allItems : allItems.filter(e=>(e.day||1)===detailDayFilter);
+  const total = allItems.reduce((s,e)=> s + (getExpenseShares(e)[idx] || 0), 0); // 卡片標題永遠顯示全部天數的總開銷
+  const shownTotal = items.reduce((s,e)=> s + (getExpenseShares(e)[idx] || 0), 0); // 目前篩選天數下的小計
   const initial = (name||'?').trim().charAt(0) || '?';
+  const isOpen = !!expandedMembers[idx];
   const rows = items.map(e=>{
     const share = getExpenseShares(e)[idx] || 0;
     const isPayer = e.payer===idx;
@@ -1741,7 +2048,7 @@ function renderDetailCard(name, idx){
     return `
     <div class="detail-row">
       <div class="detail-row-main">
-        <span class="detail-title">${escapeHtml(e.title)}</span>
+        <span class="detail-title">${escapeHtml(e.title)}${(state.days||1)>1 ? ` <span class="ticket-day-badge">第${e.day||1}天</span>` : ''}</span>
         ${isPayer ? `<span class="detail-paid-tag">已付款</span>` : `<span class="detail-payer">${escapeHtml(state.people[e.payer] ?? '—')}先付</span>`}
       </div>
       <span class="detail-amt">${state.baseCurrency} ${fmt(share)}${isForeign ? ` <small>(${e.currency} ${fmt(e.amount)})</small>` : ''}</span>
@@ -1749,33 +2056,53 @@ function renderDetailCard(name, idx){
   }).join('');
   return `
   <div class="member-card">
-    <div class="member-card-head">
+    <button class="member-card-head member-card-head-btn" data-toggle-member="${idx}">
       <span class="member-avatar">${escapeHtml(initial)}</span>
       <span class="member-name">${escapeHtml(name)}</span>
-      <button class="detail-copy-btn" data-copy-detail="${idx}" title="複製這個人的消費明細">📋 複製</button>
-    </div>
-    <div class="member-paid-row">個人總開銷 <b>${state.baseCurrency} ${fmt(total)}</b></div>
+      <span class="member-paid">個人總開銷 <b>${state.baseCurrency} ${fmt(total)}</b></span>
+      <span class="member-collapse-arrow">${isOpen ? '▲' : '▼'}</span>
+    </button>
+    ${isOpen ? `
+    <button class="detail-copy-btn" data-copy-detail="${idx}" title="複製這個人的消費明細">📋 複製個人明細（含每一天）</button>
+    ${detailDayFilter !== 'all' ? `<div class="member-paid-row">第 ${detailDayFilter} 天小計 <b>${state.baseCurrency} ${fmt(shownTotal)}</b></div>` : ''}
     <div class="member-card-body detail-scroll">
-      ${rows || `<div class="mc-empty">目前沒有分攤任何消費</div>`}
+      ${rows || `<div class="mc-empty">${allItems.length===0 ? '目前沒有分攤任何消費' : '這一天沒有分攤任何消費'}</div>`}
     </div>
+    ` : ''}
   </div>`;
 }
 
 function personalDetailText(idx){
   const name = state.people[idx] ?? '（未命名）';
-  const items = state.expenses.filter(e=>e.participants.includes(idx));
-  const total = items.reduce((s,e)=> s + (getExpenseShares(e)[idx] || 0), 0);
+  const allItems = state.expenses.filter(e=>e.participants.includes(idx));
+  const total = allItems.reduce((s,e)=> s + (getExpenseShares(e)[idx] || 0), 0);
+  const days = state.days || 1;
   const lines = [];
   lines.push(`【${name}】個人消費明細 - ${state.tripTitle}`);
   lines.push('--------------------------------');
-  if(items.length === 0){
+  if(allItems.length === 0){
     lines.push('目前沒有分攤任何消費');
-  }else{
-    items.forEach(e=>{
+  }else if(days <= 1){
+    allItems.forEach(e=>{
       const share = getExpenseShares(e)[idx] || 0;
       const tag = e.payer===idx ? '（已付款）' : `（${state.people[e.payer] ?? '—'}先付）`;
       lines.push(`${e.title}：${state.baseCurrency} ${fmt(share)} ${tag}`);
     });
+  }else{
+    for(let d=1; d<=days; d++){
+      const dayItems = allItems.filter(e=>(e.day||1)===d);
+      lines.push(`【第 ${d} 天】`);
+      if(dayItems.length === 0){
+        lines.push('（這天沒有消費）');
+      }else{
+        dayItems.forEach(e=>{
+          const share = getExpenseShares(e)[idx] || 0;
+          const tag = e.payer===idx ? '（已付款）' : `（${state.people[e.payer] ?? '—'}先付）`;
+          lines.push(`${e.title}：${state.baseCurrency} ${fmt(share)} ${tag}`);
+        });
+      }
+      if(d < days) lines.push('');
+    }
   }
   lines.push('--------------------------------');
   lines.push(`個人總開銷：${state.baseCurrency} ${fmt(total)}`);
@@ -1793,15 +2120,68 @@ async function copyPersonalDetail(idx){
   }
 }
 
+function buildFullSettlementText(){
+  const owed = computePairwiseOwed();
+  const net = netPairwise(owed);
+  const lines = [];
+  lines.push(`【每人結算卡】- ${state.tripTitle}`);
+  lines.push('================================');
+  state.people.forEach((name, idx)=>{
+    const paid = totalPaidByPerson(idx);
+    lines.push(`${name}（共付 ${state.baseCurrency} ${fmt(paid)}）`);
+    const rows = [];
+    state.people.forEach((_,j)=>{
+      if(j===idx) return;
+      if(net[j][idx] > 0.5) rows.push(`  ${state.people[j]} 要付 ${name}：${state.baseCurrency} ${fmt(net[j][idx])}`);
+      if(net[idx][j] > 0.5) rows.push(`  ${name} 要付 ${state.people[j]}：${state.baseCurrency} ${fmt(net[idx][j])}`);
+    });
+    if(rows.length === 0){
+      lines.push('  已結清，不須收付款');
+    }else{
+      lines.push(...rows);
+    }
+    lines.push('--------------------------------');
+  });
+  lines.push(`匯出時間：${new Date().toLocaleString('zh-Hant-TW', {hour12:false})}`);
+  return lines.join('\n');
+}
+
+async function copyFullSettlement(){
+  const text = buildFullSettlementText();
+  try{
+    await navigator.clipboard.writeText(text);
+    flashSaved('已複製全部結算內容');
+  }catch(e){
+    console.error('複製失敗', e);
+    flashSaved('複製失敗，請手動選取文字');
+  }
+}
+
 function escapeHtml(s){
   return String(s ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 /* ---------- 事件綁定 ---------- */
+function enableWheelHorizontalScroll(el){
+  if(!el || el.dataset.wheelScrollBound) return;
+  el.dataset.wheelScrollBound = '1'; // 避免每次重繪都重複掛上同一個監聽
+  el.addEventListener('wheel', (e)=>{
+    if(el.scrollWidth <= el.clientWidth) return; // 內容沒有超出寬度就不用管
+    // 滑鼠滾輪／觸控板的垂直捲動，轉成這排頁籤的橫向捲動，
+    // 這樣捲軸隱藏後，用滑鼠的電腦使用者一樣能捲得動
+    if(Math.abs(e.deltaY) > Math.abs(e.deltaX)){
+      el.scrollLeft += e.deltaY;
+      e.preventDefault();
+    }
+  }, { passive:false });
+}
+
 function bindGlobalEvents(){
   document.querySelectorAll('[data-tab]').forEach(btn=>{
     btn.onclick = ()=>setTab(btn.dataset.tab);
   });
+
+  document.querySelectorAll('.day-tabs').forEach(el=>enableWheelHorizontalScroll(el));
 
   const titleInput = document.getElementById('tripTitleInput');
   if(titleInput) titleInput.oninput = (e)=>updateTitle(e.target.value);
@@ -1810,6 +2190,11 @@ function bindGlobalEvents(){
   const peoplePlus = document.getElementById('peoplePlus');
   if(peopleMinus) peopleMinus.onclick = ()=>changePeopleCount(-1);
   if(peoplePlus) peoplePlus.onclick = ()=>changePeopleCount(1);
+
+  const daysMinus = document.getElementById('daysMinus');
+  const daysPlus = document.getElementById('daysPlus');
+  if(daysMinus) daysMinus.onclick = ()=>changeDaysCount(-1);
+  if(daysPlus) daysPlus.onclick = ()=>changeDaysCount(1);
 
   const baseCurSel = document.getElementById('baseCurrencySelect');
   if(baseCurSel) baseCurSel.onchange = (e)=>updateBaseCurrency(e.target.value);
@@ -1832,13 +2217,22 @@ function bindGlobalEvents(){
   if(dTitle) dTitle.oninput = (e)=>{ draft.title = e.target.value; refreshAddButton(); };
 
   const dAmount = document.getElementById('draftAmount');
-  if(dAmount) dAmount.oninput = (e)=>{ draft.amount = e.target.value; updateConversionNote(); updateCustomShareSum(); refreshAddButton(); };
+  if(dAmount) dAmount.oninput = (e)=>{
+    draft.amount = e.target.value;
+    updateConversionNote();
+    if(draft.splitMode === 'custom') autoFillRemainingShares();
+    updateCustomShareSum();
+    refreshAddButton();
+  };
 
   const dCurrency = document.getElementById('draftCurrency');
   if(dCurrency) dCurrency.onchange = (e)=>{ draft.currency = e.target.value; updateConversionNote(); };
 
   const dPayer = document.getElementById('draftPayer');
   if(dPayer) dPayer.onchange = (e)=>{ draft.payer = parseInt(e.target.value); };
+
+  const dDay = document.getElementById('draftDay');
+  if(dDay) dDay.onchange = (e)=>{ draft.day = parseInt(e.target.value); };
 
   const fetchBtn = document.getElementById('fetchRatesBtn');
   if(fetchBtn) fetchBtn.onclick = fetchLiveRates;
@@ -1863,12 +2257,45 @@ function bindGlobalEvents(){
   const exportBtn = document.getElementById('exportCsvBtn');
   if(exportBtn) exportBtn.onclick = exportToCsv;
 
+  const copyAllSettlementBtn = document.getElementById('copyAllSettlementBtn');
+  if(copyAllSettlementBtn) copyAllSettlementBtn.onclick = copyFullSettlement;
+
+  const endTripBtn = document.getElementById('endTripBtn');
+  if(endTripBtn) endTripBtn.onclick = endTrip;
+
+  const cancelEndTripBtn = document.getElementById('cancelEndTripBtn');
+  if(cancelEndTripBtn) cancelEndTripBtn.onclick = cancelEndTrip;
+
   document.querySelectorAll('[data-copy-detail]').forEach(btn=>{
     btn.onclick = ()=>copyPersonalDetail(parseInt(btn.dataset.copyDetail));
   });
 
   document.querySelectorAll('[data-toggle-participant]').forEach(chip=>{
     chip.onclick = ()=>toggleParticipant(parseInt(chip.dataset.toggleParticipant));
+  });
+
+  document.querySelectorAll('[data-expense-day-tab]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const v = btn.dataset.expenseDayTab;
+      expenseDayFilter = v === 'all' ? 'all' : parseInt(v);
+      renderAddTabOnly();
+    };
+  });
+
+  document.querySelectorAll('[data-detail-day-tab]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const v = btn.dataset.detailDayTab;
+      detailDayFilter = v === 'all' ? 'all' : parseInt(v);
+      renderAddTabOnly();
+    };
+  });
+
+  document.querySelectorAll('[data-toggle-member]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const idx = btn.dataset.toggleMember;
+      expandedMembers[idx] = !expandedMembers[idx];
+      renderAddTabOnly();
+    };
   });
 
   const selAll = document.getElementById('selectAllBtn');
@@ -1882,7 +2309,10 @@ function bindGlobalEvents(){
 
   document.querySelectorAll('[data-custom-share]').forEach(inp=>{
     inp.oninput = (e)=>{
-      draft.customShares[inp.dataset.customShare] = e.target.value;
+      const idx = inp.dataset.customShare;
+      draft.customShares[idx] = e.target.value;
+      draft.customSharesTouched[idx] = true;
+      autoFillRemainingShares();
       updateCustomShareSum();
     };
   });
