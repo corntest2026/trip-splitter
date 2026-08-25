@@ -40,7 +40,7 @@
     --paper:#2A2723;
     --paper-2:#332F29;
     --teal:#5C6B7A;
-    --teal-deep:#434F5C;
+    --teal-deep:#4E6E62;
     --gold:#C7A876;
     --coral:#BC7A64;
     --line:#454038;
@@ -257,7 +257,7 @@ body{
 .tab-btn.active{
   background:var(--teal);
   border-color:var(--teal-deep);
-  color:var(--white);
+  color:var(--block-text);
 }
 
 /* ===== Card ===== */
@@ -328,7 +328,7 @@ input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--
 .chip.on{
   background:var(--teal);
   border-color:var(--teal-deep);
-  color:var(--white);
+  color:var(--block-text);
   font-weight:600;
 }
 .chip-row-actions{display:flex;gap:14px;margin-top:6px;}
@@ -361,7 +361,7 @@ input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--
   width:100%;
   padding:13px;
   background:var(--coral);
-  color:var(--white);
+  color:var(--block-text);
   border:none;
   border-radius:6px;
   font-family:'IBM Plex Mono',monospace;
@@ -371,7 +371,7 @@ input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--
   cursor:pointer;
 }
 .btn-primary:hover{background:#a63a23;}
-.btn-primary:disabled{background:#ccc;cursor:not-allowed;}
+.btn-primary:disabled{background:var(--line);color:var(--ink-soft);cursor:not-allowed;}
 
 /* ===== Expense ticket ===== */
 .ticket{
@@ -418,7 +418,7 @@ input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--
   font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;cursor:pointer;
   white-space:nowrap;
 }
-.day-tab-btn.active{background:var(--teal);border-color:var(--teal-deep);color:var(--white);}
+.day-tab-btn.active{background:var(--teal);border-color:var(--teal-deep);color:var(--block-text);}
 
 .empty-state{
   text-align:center;padding:34px 12px;color:var(--ink-soft);
@@ -510,7 +510,7 @@ input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--
   display:block;width:100%;text-align:center;
   background:var(--teal);
   border:1px solid var(--teal-deep);
-  color:var(--white);
+  color:var(--block-text);
   font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:700;
   padding:10px 12px;cursor:pointer;
 }
@@ -558,7 +558,7 @@ input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--
 .detail-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;}
 .detail-paid-tag{
   font-family:'IBM Plex Mono',monospace;font-size:9.5px;
-  background:var(--teal);color:var(--white);
+  background:var(--teal-deep);color:var(--block-text);
   padding:2px 6px;border-radius:10px;flex-shrink:0;white-space:nowrap;
 }
 .detail-payer{
@@ -613,7 +613,7 @@ input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--
   font-size:13px;
   cursor:pointer;
 }
-.btn-rose:hover{background:var(--coral);color:var(--white);}
+.btn-rose:hover{background:var(--coral);color:var(--block-text);}
 .btn-rose:disabled{opacity:0.6;cursor:wait;}
 
 .rate-updated{
